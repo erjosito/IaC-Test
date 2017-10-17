@@ -275,8 +275,7 @@
                 "count": "[parameters('vmCount')]"
             },
             "dependsOn": [
-                "[concat(parameters('vmName'), '-nic0')]",
-                "[concat(parameters('vmName'), '-nic1')]"
+                "[concat(parameters('vmName'), '-nic0')]"
             ]
         },
 		{

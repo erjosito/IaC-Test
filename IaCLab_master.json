@@ -99,7 +99,7 @@
 				"parameters":  "[variables('vmParams')]"
 			},
             "dependsOn": [
-                "vnets"
+                "vnet"
             ]
 		}
     ]
