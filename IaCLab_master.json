@@ -1,0 +1,106 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "adminUsername": {
+            "defaultValue": null,
+            "type": "string",
+            "metadata": { "description": "Default username for VMs and NVAs" }
+		},
+        "adminPassword": {
+            "defaultValue": null,
+            "type": "securestring",
+            "metadata": { "description": "Default password for VMs and NVAs" }
+		},
+        "vmType": {
+            "defaultValue": "ubuntu",
+            "type": "string",
+            "allowedValues": [ "ubuntu","ubuntuScaleSet" ],
+            "metadata": { "description": "Choose ubuntuScaleSet to deploy NVA in a scale set" }
+        },
+        "createUDR": {
+            "defaultValue": "no",
+            "type": "string",
+            "allowedValues": [ "yes","no" ],
+            "metadata": { "description": "Whether UDRs should be configured (lab solution)" }
+        },
+        "lbSku": {
+            "defaultValue": "basic",
+            "type": "string",
+            "allowedValues": [ "basic","standard" ],
+            "metadata": { "description": "Whether Load Balancers should be Basic or Standard (preview)" }
+        },
+        "repoBranch": {
+            "defaultValue": "master",
+            "type": "string",
+            "metadata": { "description": "Branch out of the Github repo where the nested templates will be downloaded from" }
+        }
+    },
+    "variables": {
+        "baseRepoURL": "[concat('https://raw.githubusercontent.com/erjosito/IaC-Test/', parameters('repoBranch'), '/')]",
+        "storageAccountName": "[concat('storage', uniqueString(resourceGroup().id))]",
+        "vnetParams": {
+            "baseRepoURL": { "value": "[variables('baseRepoURL')]" },
+            "vnetName": { "value": "myVnet" },
+            "vnetOctets12": { "value": "10.1." }
+        },
+        "vnetTemplateUri": "[concat(variables('baseRepoURL'), 'vnet3Subnets.json')]",
+        "customScript": "ubuntu_vm_config",
+        "customScriptUri": "[concat(variables('baseRepoURL'), variables('customScript'))]",
+        "customScriptCmd": "[concat('chmod 666 ', variables('customScript'), ' && /bin/sh ./', variables('customScript'))]",
+        "vmParams": {
+            "baseRepoURL": { "value": "[variables('baseRepoURL')]" },
+            "vmType": { "value": "ubuntu" },
+            "vmCount": { "value": 2 },
+            "vmName": { "value": "my_vm" },
+            "vnetName": { "value": "myVnet" },
+            "storageAccountName": { "value": "[variables('storageAccountName')]" },
+            "subnet0Name": { "value": "myVnet4subnet1" },
+            "pipName": { "value": "nvaPip" },
+            "vmUsr": { "value": "[parameters('adminUsername')]" },
+            "vmPwd": { "value": "[parameters('adminPassword')]" },
+            "ip0": { "value": "10.1.0.4" },
+            "deployLBYesNo": { "value": "yes" },
+            "lbSku": { "value": "[parameters('lbSku')]" },
+            "scriptUri": { "value": "[variables('customScriptUri')]" },
+            "scriptCmd": { "value": "[variables('customScriptCmd')]" }
+        },
+        "vmTemplateUri": {
+            "ubuntu": "[concat(variables('baseRepoURL'), 'vmLinux_1nic_noVnet.json')]",
+            "ubuntuScaleSet": "[concat(variables('baseRepoURL'), 'vmLinux_1nic_noVnet_ScaleSet_ILBonly.json')]"
+        }
+    },
+    "resources": [
+		{
+			"comments": "Create a vnet, 3 standard subnets, no gateway subnet",
+            "name": "vnet",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2016-06-01",
+			"properties": {
+				"mode": "Incremental",
+				"templateLink": {
+					"uri": "[variables('vnetTemplateUri')]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters":  "[variables('vnetParams')]"
+			}
+		},
+		{
+			"comments": "Create VMs",
+            "name": "VMs",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2016-06-01",
+			"properties": {
+				"mode": "Incremental",
+				"templateLink": {
+					"uri": "[variables('vmTemplateUri')]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters":  "[variables('vmParams')]"
+			},
+            "dependsOn": [
+                "vnets"
+            ]
+		}
+    ]
+}

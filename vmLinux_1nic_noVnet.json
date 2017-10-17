@@ -1,0 +1,333 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "apiVersion": {
+            "defaultValue": "2015-06-15",
+            "type": "string"
+        },
+        "vnetName": {
+            "defaultValue": "myVnet",
+            "type": "string"
+        },
+        "storageAccountName": {
+            "defaultValue": "mystorageaccount",
+            "type": "string"
+        },
+        "vmType": {
+            "defaultValue": "ubuntu",
+            "type": "string",
+            "allowedValues": ["ubuntu"]
+        },
+        "vmCount": {
+            "defaultValue": 1,
+            "type": "int"
+        },
+        "vmName": {
+            "defaultValue": "myVm",
+            "type": "string"
+        },
+        "vmUsr": {
+            "defaultValue": "myadmin",
+            "type": "string"
+        },
+        "vmPwd": {
+            "defaultValue": null,
+            "type": "securestring"
+        },
+        "pipName": {
+            "defaultValue": "vm-publicIP",
+            "type": "string"
+        },
+        "subnet0Name": {
+            "defaultValue": "subnet1",
+            "type": "string"
+        },
+        "ip0": {
+            "defaultValue": "10.0.0.10",
+            "type": "string",
+            "metadata": { "description": "This string will be completed with the copyIndex: .101, .102, etc" }
+        },
+        "scriptUri": {
+            "defaultValue": "https://raw.githubusercontent.com/erjosito/IaC-Test/master/linux-vm-config.sh",
+            "type": "string",
+            "metadata": { "description": "Script that will be executed" }            
+        },
+        "scriptCmd": {
+            "defaultValue": "sh linuxNVAconfig.sh",
+            "type": "string",
+            "metadata": { "description": "Command to run the script" }            
+        },
+		"deployLBYesNo": {
+			"defaultValue": "no",
+			"type": "string"
+		},
+        "lbSku": {
+            "defaultValue": "basic",
+            "type": "string",
+            "allowedValues": [ "basic","standard" ],
+            "metadata": { "description": "Whether Load Balancers should be Basic or Standard (preview)" }
+        },
+        "baseRepoURL": {
+            "defaultValue": "https://raw.githubusercontent.com/erjosito/azure-networking-lab/master/",
+            "type": "string",
+            "metadata": { "description": "URL where the nested templates are downloaded from" }    
+        }
+    },
+    "variables": {
+        "defaultGw": {
+            "nic0": "[concat(parameters('ip0'), '1')]"
+        },
+        "settingsTable": {
+            "ubuntu": {
+                "product": "UbuntuServer",
+                "publisher": "Canonical",
+                "sku": "16.04.0-LTS",
+                "vmSize": "Standard_D2_v2"
+            }
+        },
+        "settings": "[variables('settingsTable')[parameters('vmType')]]",
+        "avSetName": "[concat(parameters('vmName'),'AvSet')]",
+        "slbName": "[concat(parameters('vmName'), '-slb')]",
+        "slbBackendName": "[concat(parameters('vmName'), '-slbBackend')]",
+        "slbPipName": "[concat(parameters('vmName'), '-slbPip')]",
+        "ipPrefix": "10.4.2",
+        "vipSuffix": "100",
+        "slbSubnet": "[parameters('subnet0Name')]",
+		"deployLBTemplate": {
+			"yes": "[concat(parameters('baseRepoURL'), 'slb.json')]",
+			"no": "[concat(parameters('baseRepoURL'), 'nothing.json')]"
+		},
+		"LBTemplateURI": "[variables('deployLBTemplate')[parameters('deployLBYesNo')]]",
+        "deployLBintParametersHash": {
+            "yes": {
+                "baseRepoURL": {
+                    "value": "[parameters('baseRepoURL')]"
+                },
+                "externalInternal": {
+                    "value": "internal"
+                },
+                "vnetName": {
+                    "value": "[parameters('vnetName')]"
+                },
+                "subnetName": {
+                    "value": "[variables('slbSubnet')]"
+                },
+                "slbName": {
+                    "value": "[concat(variables('slbName'), '-int')]"
+                },
+                "backendConfigName": {
+                    "value": "[concat(variables('slbBackendName'), '-int')]"
+                },
+                "ipPrefix": {
+                    "value": "[variables('ipPrefix')]"
+                },
+                "vipSuffix": {
+                    "value": "[variables('vipSuffix')]"
+                },
+                "probePort": {
+                    "value": 1138
+                },
+                "frontendPort": {
+                    "value": 22
+                },
+                "backendPort": {
+                    "value": 22
+                },
+                "ruleName": {
+                    "value": "ssh"
+                }
+            },
+            "no": {
+            }
+        },
+        "deployLBintParameters": "[variables('deployLBintParametersHash')[parameters('deployLBYesNo')]]",
+        "deployLBextParametersHash": {
+            "yes": {
+                "externalInternal": {
+                    "value": "external"
+                },
+                "vnetName": {
+                    "value": "[parameters('vnetName')]"
+                },
+                "subnetName": {
+                    "value": "[variables('slbSubnet')]"
+                },
+                "slbName": {
+                    "value": "[concat(variables('slbName'), '-ext')]"
+                },
+                "backendConfigName": {
+                    "value": "[concat(variables('slbBackendName'), '-ext')]"
+                },
+                "pipName": {
+                    "value": "[concat(variables('slbPipName'), '-ext')]"
+                },
+                "probePort": {
+                    "value": 1139
+                },
+                "frontendPort": {
+                    "value": 1022
+                },
+                "backendPort": {
+                    "value": 22
+                },
+                "ruleName": {
+                    "value": "ssh"
+                }
+            },
+            "no": {
+            }
+        },
+        "deployLBextParameters": "[variables('deployLBextParametersHash')[parameters('deployLBYesNo')]]"
+    },
+    "resources": [
+		{
+			"comments": "Availability set for eventual NVA HA",
+			"type": "Microsoft.Compute/availabilitySets",
+			"name": "[variables('avSetName')]",
+			"apiVersion": "2016-03-30",
+			"location": "[resourceGroup().location]"
+		},
+		{
+			"comments": "Optionally, create an internal load balancer",
+            "name": "nva-slb-int",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2016-06-01",
+			"properties": {
+				"mode": "Incremental",
+				"templateLink": {
+					"uri": "[variables('LBTemplateUri')]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters":  "[variables('deployLBintParameters')]"
+			}
+		},
+		{
+			"comments": "Optionally, create an external load balancer. Wait until the internal has been created, there seems to be some conflict when creating both at the same time",
+            "name": "nva-slb-ext",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2016-06-01",
+			"properties": {
+				"mode": "Incremental",
+				"templateLink": {
+					"uri": "[variables('LBTemplateUri')]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters":  "[variables('deployLBextParameters')]"
+			},
+            "dependsOn": [
+                "nva-slb-int"
+            ]
+		},
+        {
+            "comments": "Deploy Linux VM as Virtual Network Appliance",
+            "type": "Microsoft.Compute/virtualMachines",
+            "name": "[concat(parameters('vmName'), '-', copyIndex(1))]",
+            "apiVersion": "2015-06-15",
+            "location": "[resourceGroup().location]",
+            "properties": {
+				"availabilitySet": {
+					"id": "[resourceId('Microsoft.Compute/availabilitySets', variables('avSetName'))]"
+				},
+                "hardwareProfile": {
+                    "vmSize": "[variables('settings')['vmSize']]"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "[variables('settings')['publisher']]",
+                        "offer": "[variables('settings')['product']]",
+                        "sku": "[variables('settings')['sku']]",
+                        "version": "latest"
+                    },
+                    "osDisk": {
+                        "name": "[concat(parameters('vmName'), '-', copyIndex(1),'-disk')]",
+                        "createOption": "FromImage",
+                        "vhd": {
+                            "uri": "[concat('http', '://', parameters('storageAccountName'), '.blob.core.windows.net', concat('/vhds/', parameters('vmName'), '-', copyIndex(1),'-disk.vhd'))]"
+                        },
+                        "caching": "ReadWrite"
+                    },
+                    "dataDisks": []
+                },
+                "osProfile": {
+                    "computerName": "[concat(parameters('vmName'), '-', copyIndex(1))]",
+                    "adminUsername": "[parameters('vmUsr')]",
+                    "linuxConfiguration": {
+                        "disablePasswordAuthentication": false
+                    },
+                    "secrets": [],
+                    "adminPassword": "[parameters('vmPwd')]"
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(parameters('vmName'), '-', copyIndex(1), '-nic0'))]",
+                            "properties": {
+                                "primary": true
+                            }
+                        }
+                    ]
+                }
+            },
+            "resources": [],
+            "copy": {
+                "name": "[parameters('vmName')]",
+                "count": "[parameters('vmCount')]"
+            },
+            "dependsOn": [
+                "[concat(parameters('vmName'), '-nic0')]",
+                "[concat(parameters('vmName'), '-nic1')]"
+            ]
+        },
+		{
+			"comments": "Create eth0",
+            "name": "[concat(parameters('vmName'), '-', copyIndex(1), '-nic0')]",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2016-06-01",
+			"properties": {
+				"mode": "Incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('baseRepoURL'),'nic_noNSG_noSLB_noPIP_static.json')]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters":  {
+                    "nicName": {"value": "[concat(parameters('vmName'), '-', copyIndex(1), '-nic0')]"},
+                    "ipAddress": { "value": "[concat(parameters('ip0'), copyIndex(1))]" },                    
+                    "vnetName": { "value": "[parameters('vnetName')]" },
+                    "subnetName": { "value": "[parameters('subnet0Name')]"}
+                }
+            },
+            "dependsOn": [  
+            ],
+            "copy": {
+                "name": "[concat(parameters('vmName'), '-nic0')]",
+                "count": "[parameters('vmCount')]"
+            }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "name": "[concat(parameters('vmName'), '-', copyIndex(1), '/installcustomscript')]",
+            "apiVersion": "2015-05-01-preview",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "publisher": "Microsoft.Azure.Extensions",
+                "type": "CustomScript",
+                "typeHandlerVersion": "2.0",
+                "autoUpgradeMinorVersion": true,
+                "settings": {
+                    "fileUris": [
+                        "[parameters('scriptUri')]"
+                    ],
+                    "commandToExecute": "[parameters('scriptCmd')]"
+                }
+            },
+            "dependsOn": [
+                "[parameters('vmName')]"
+            ],
+            "copy": {
+                "name": "[concat(parameters('vmName'), '-script')]",
+                "count": "[parameters('vmCount')]"
+            }
+        }
+    ]
+}

@@ -1,0 +1,142 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "externalInternal": {
+            "defaultValue": "internal",
+            "type": "string"
+        },
+		"vnetName": {
+            "defaultValue": "myVnet",
+            "type": "string"
+		},
+		"subnetName": {
+            "defaultValue": "serverSubnet",
+            "type": "string"
+		},
+        "slbName": {
+            "defaultValue": "mySLB",
+            "type": "string"
+        },
+        "backendConfigName": {
+            "defaultValue": "myBackendConfig",
+            "type": "string"
+        },
+        "ipPrefix": {
+            "defaultValue": "10.0.1",
+            "type": "string"
+        },
+        "vipSuffix": {
+            "defaultValue": "100",
+            "type": "string"
+        },
+        "pipName": {
+            "defaultValue": "myPublicIp",
+            "type": "string"
+        },
+        "frontendPort": {
+            "defaultValue": 1022,
+            "type": "int",
+            "metadata": { "description": "Frontend TCP port" }
+        },
+        "backendPort": {
+            "defaultValue": 22,
+            "type": "int",
+            "metadata": { "description": "Backend TCP port" }
+        },
+        "probePort": {
+            "defaultValue": 22,
+            "type": "int",
+            "metadata": { "description": "TCP port that will configured in the TCP-based probe" }
+        },
+        "ruleName": {
+            "defaultValue": "ssh",
+            "type": "string"
+        },
+        "dsr": {
+            "defaultValue": "false",
+            "type": "string",
+            "metadata": { "description": "whether Direct Server Return, aka Floating IP, is enabled or not" }
+        },
+        "lbSku": {
+            "defaultValue": "basic",
+            "type": "string",
+            "allowedValues": [ "basic","standard" ],
+            "metadata": { "description": "Whether Load Balancers should be Basic or Standard (preview)" }
+        },
+        "baseRepoURL": {
+            "defaultValue": "https://raw.githubusercontent.com/erjosito/azure-networking-lab/master/",
+            "type": "string",
+            "metadata": { "description": "URL where the nested templates are downloaded from" }    
+        }
+	},
+
+    "variables": {
+		"deployLBTemplate": {
+			"internal": "[concat(parameters('baseRepoURL'), 'internalLB.json')]",
+			"external": "[concat(parameters('baseRepoURL'), 'externalLB.json')]"
+		},
+		"LBTemplateURI": "[variables('deployLBTemplate')[parameters('externalInternal')]]",
+		"LBStandardTemplateURI": "[concat(parameters('baseRepoURL'), 'internalLB_standard.json')]"
+    },
+
+
+    "resources": [
+		{
+            "comments": "Azure Load Balancer, Basic SKU, internal or external",
+            "condition": "[equals(parameters('lbSku'), 'basic')]",
+			"name": "AzureLBbasic",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2016-06-01",
+			"properties": {
+				"mode": "Incremental",
+				"templateLink": {
+					"uri": "[variables('LBTemplateUri')]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters":  {
+                    "vnetName": { "value": "[parameters('vnetName')]" },
+                    "subnetName": { "value": "[parameters('subnetName')]"},
+                    "slbName": { "value": "[parameters('slbName')]" },
+                    "backendPort": { "value": "[parameters('backendPort')]"},
+                    "frontendPort": { "value": "[parameters('frontendPort')]"},
+                    "probePort": { "value": "[parameters('probePort')]"},
+                    "ruleName": { "value": "[parameters('ruleName')]"},
+                    "dsr": { "value": "[parameters('dsr')]"},
+                    "backendConfigName": { "value": "[parameters('backendConfigName')]"},
+                    "ipPrefix": { "value": "[parameters('ipPrefix')]"},
+                    "vipSuffix": { "value": "[parameters('vipSuffix')]"},
+                    "pipName": { "value": "[parameters('pipName')]"}
+                }
+			}
+        },
+		{
+            "comments": "Azure Load Balancer, Standard SKU, internal",
+            "condition": "[equals(parameters('lbSku'), 'standard')]",
+			"name": "AzureLBstandard",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2016-06-01",
+			"properties": {
+				"mode": "Incremental",
+				"templateLink": {
+					"uri": "[variables('LBStandardTemplateURI')]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters":  {
+                    "vnetName": { "value": "[parameters('vnetName')]" },
+                    "subnetName": { "value": "[parameters('subnetName')]"},
+                    "slbName": { "value": "[parameters('slbName')]" },
+                    "backendPort": { "value": "[parameters('backendPort')]"},
+                    "frontendPort": { "value": "[parameters('frontendPort')]"},
+                    "probePort": { "value": "[parameters('probePort')]"},
+                    "ruleName": { "value": "[parameters('ruleName')]"},
+                    "dsr": { "value": "[parameters('dsr')]"},
+                    "backendConfigName": { "value": "[parameters('backendConfigName')]"},
+                    "ipPrefix": { "value": "[parameters('ipPrefix')]"},
+                    "vipSuffix": { "value": "[parameters('vipSuffix')]"},
+                    "pipName": { "value": "[parameters('pipName')]"}
+                }
+			}
+        }
+    ]
+}
