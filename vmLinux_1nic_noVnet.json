@@ -35,18 +35,9 @@
             "defaultValue": null,
             "type": "securestring"
         },
-        "pipName": {
-            "defaultValue": "vm-publicIP",
-            "type": "string"
-        },
         "subnet0Name": {
             "defaultValue": "subnet1",
             "type": "string"
-        },
-        "ip0": {
-            "defaultValue": "10.0.0.10",
-            "type": "string",
-            "metadata": { "description": "This string will be completed with the copyIndex: .101, .102, etc" }
         },
         "scriptUri": {
             "defaultValue": "https://raw.githubusercontent.com/erjosito/IaC-Test/master/linux-vm-config.sh",
@@ -69,7 +60,7 @@
             "metadata": { "description": "Whether Load Balancers should be Basic or Standard (preview)" }
         },
         "baseRepoURL": {
-            "defaultValue": "https://raw.githubusercontent.com/erjosito/azure-networking-lab/master/",
+            "defaultValue": "https://raw.githubusercontent.com/erjosito/Iac-Test/master/",
             "type": "string",
             "metadata": { "description": "URL where the nested templates are downloaded from" }    
         }
@@ -95,12 +86,12 @@
         "ipPrefix": "10.4.2",
         "vipSuffix": "100",
         "slbSubnet": "[parameters('subnet0Name')]",
-		"deployLBTemplate": {
+		"lbTemplateUriHash": {
 			"yes": "[concat(parameters('baseRepoURL'), 'slb.json')]",
 			"no": "[concat(parameters('baseRepoURL'), 'nothing.json')]"
 		},
-		"LBTemplateURI": "[variables('deployLBTemplate')[parameters('deployLBYesNo')]]",
-        "deployLBintParametersHash": {
+		"lbTemplateUri": "[variables('lbTemplateUriHash')[parameters('deployLBYesNo')]]",
+        "lbTemplateParametersIntHash": {
             "yes": {
                 "baseRepoURL": {
                     "value": "[parameters('baseRepoURL')]"
@@ -145,8 +136,8 @@
             "no": {
             }
         },
-        "deployLBintParameters": "[variables('deployLBintParametersHash')[parameters('deployLBYesNo')]]",
-        "deployLBextParametersHash": {
+        "lbTemplateParametersInt": "[variables('lbTemplateParametersIntHash')[parameters('deployLBYesNo')]]",
+        "lbTemplateParametersExtHash": {
             "yes": {
                 "externalInternal": {
                     "value": "external"
@@ -185,7 +176,7 @@
             "no": {
             }
         },
-        "deployLBextParameters": "[variables('deployLBextParametersHash')[parameters('deployLBYesNo')]]"
+        "lbTemplateParametersExt": "[variables('lbTemplateParametersExtHash')[parameters('deployLBYesNo')]]"
     },
     "resources": [
 		{
@@ -197,33 +188,33 @@
 		},
 		{
 			"comments": "Optionally, create an internal load balancer",
-            "name": "nva-slb-int",
+            "name": "slb-int",
 			"type": "Microsoft.Resources/deployments",
 			"apiVersion": "[variables('networkApiVersion')]",
 			"properties": {
 				"mode": "Incremental",
 				"templateLink": {
-					"uri": "[variables('LBTemplateUri')]",
+					"uri": "[variables('lbTemplateUri')]",
 					"contentVersion": "1.0.0.0"
 				},
-				"parameters":  "[variables('deployLBintParameters')]"
+				"parameters":  "[variables('lbTemplateParametersInt')]"
 			}
 		},
 		{
 			"comments": "Optionally, create an external load balancer. Wait until the internal has been created, there seems to be some conflict when creating both at the same time",
-            "name": "nva-slb-ext",
+            "name": "slb-ext",
 			"type": "Microsoft.Resources/deployments",
 			"apiVersion": "[variables('networkApiVersion')]",
 			"properties": {
 				"mode": "Incremental",
 				"templateLink": {
-					"uri": "[variables('LBTemplateUri')]",
+					"uri": "[variables('lbTemplateUri')]",
 					"contentVersion": "1.0.0.0"
 				},
-				"parameters":  "[variables('deployLBextParameters')]"
+				"parameters":  "[variables('lbTemplateParametersExt')]"
 			},
             "dependsOn": [
-                "nva-slb-int"
+                "slb-int"
             ]
 		},
         {
@@ -298,10 +289,11 @@
 				},
 				"parameters":  {
                     "nicName": {"value": "[concat(parameters('vmName'), '-', copyIndex(1), '-nic0')]"},
-                    "ipAddress": { "value": "[concat(parameters('ip0'), copyIndex(1))]" },                    
                     "vnetName": { "value": "[parameters('vnetName')]" },
                     "subnetName": { "value": "[parameters('subnet0Name')]"},
-                    "slbName": { "value": "[concat(variables('slbName'), '-int')]"}                    
+                    "slbName": { "value": "[concat(variables('slbName'), '-int')]"},
+                    "slbYesNo": { "value": "[parameters('deployLBYesNo')]"},
+                    "pipYesNo": { "value": "no"}
                 }
             },
             "dependsOn": [  

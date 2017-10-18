@@ -45,8 +45,8 @@
         "vnetOctets12": "10.1.",
         "subnetName": "subnet1",
         "vnetSpace": "[concat(variables('vnetOctets12'), '0.0/16')]",
-        "subnetPrefix": "[concat(variables('vnetOctets12'), '1.0/24')]",        
-        "customScript": "ubuntu_vm_config",
+        "subnetPrefix": "[concat(variables('vnetOctets12'), '1.0/24')]",
+        "customScript": "ubuntu_vm_config.sh",
         "customScriptUri": "[concat(variables('baseRepoURL'), variables('customScript'))]",
         "customScriptCmd": "[concat('chmod 666 ', variables('customScript'), ' && /bin/sh ./', variables('customScript'))]",
         "vmParams": {
@@ -57,11 +57,10 @@
             "vnetName": { "value": "[variables('vnetName')]" },
             "storageAccountName": { "value": "[variables('storageAccountName')]" },
             "subnet0Name": { "value": "myVnet4subnet1" },
-            "pipName": { "value": "nvaPip" },
             "vmUsr": { "value": "[parameters('adminUsername')]" },
             "vmPwd": { "value": "[parameters('adminPassword')]" },
             "ip0": { "value": "10.1.0.4" },
-            "deployLBYesNo": { "value": "yes" },
+            "deployLBYesNo": { "value": "no" },
             "lbSku": { "value": "[parameters('lbSku')]" },
             "scriptUri": { "value": "[variables('customScriptUri')]" },
             "scriptCmd": { "value": "[variables('customScriptCmd')]" }
