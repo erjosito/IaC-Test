@@ -110,7 +110,7 @@
 				"parameters":  "[variables('vmParams')]"
 			},
             "dependsOn": [
-                "thisVnet"
+                "[variables('vnetName')]"
             ]
 		}
     ]
