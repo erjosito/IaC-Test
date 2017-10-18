@@ -96,7 +96,7 @@
 			"properties": {
 				"mode": "Incremental",
 				"templateLink": {
-					"uri": "[variables('vmTemplateUri')]",
+					"uri": "[variables('vmTemplateUri')[parameters('vmType')]]",
 					"contentVersion": "1.0.0.0"
 				},
 				"parameters":  "[variables('vmParams')]"
