@@ -31,8 +31,9 @@
         }
     },
     "variables": {
-        "deploymentApiVersion": "2017-08-01",
-        "networkApiVersion": "2017-09-01",        
+        "deploymentApiVersion": "2017-08-10",
+        "networkApiVersion": "2017-09-01",
+        "storageApiVersion": "2016-01-01",
         "baseRepoURL": "[concat('https://raw.githubusercontent.com/erjosito/IaC-Test/', parameters('repoBranch'), '/')]",
         "storageAccountName": "[concat('storage', uniqueString(resourceGroup().id))]",
         "vnetName": "myVnet",
@@ -64,6 +65,22 @@
         }
     },
     "resources": [
+        {
+			"comments": "Storage account for VM disks",
+			"type": "Microsoft.Storage/storageAccounts",
+            "sku": {
+                "name": "Standard_LRS",
+                "tier": "Standard"
+            },
+            "kind": "Storage",
+            "name": "[variables('storageAccountName')]",
+            "apiVersion": "[variables('storageApiVersion')]",
+            "location": "[resourceGroup().location]",
+            "tags": {},
+            "properties": {},
+            "resources": [],
+            "dependsOn": []
+        },
         {
             "comments": "Create Vnet with three subnets and one gateway subnet",
             "type": "Microsoft.Network/virtualNetworks",
@@ -102,7 +119,7 @@
 				"parameters":  "[variables('vmParams')]"
 			},
             "dependsOn": [
-                "[variables('vnetName')]"
+                "[variables('vnetName')]", "[variables('storageAccountName')]"
             ]
 		}
     ]
