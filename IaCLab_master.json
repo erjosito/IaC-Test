@@ -45,7 +45,7 @@
         "customScriptCmd": "[concat('chmod 666 ', variables('customScript'), ' && /bin/sh ./', variables('customScript'))]",
         "vmParams": {
             "baseRepoURL": { "value": "[variables('baseRepoURL')]" },
-            "vmType": { "value": "ubuntu" },
+            "vmType": { "value": "[parameters('vmType')]" },
             "vmCount": { "value": 2 },
             "vmName": { "value": "myvm" },
             "vnetName": { "value": "[variables('vnetName')]" },
@@ -53,7 +53,6 @@
             "subnet0Name": { "value": "[variables('subnetName')]" },
             "vmUsr": { "value": "[parameters('adminUsername')]" },
             "vmPwd": { "value": "[parameters('adminPassword')]" },
-            "ip0": { "value": "10.1.0.4" },
             "deployLBYesNo": { "value": "no" },
             "lbSku": { "value": "[parameters('lbSku')]" },
             "scriptUri": { "value": "[variables('customScriptUri')]" },
