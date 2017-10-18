@@ -94,7 +94,7 @@
 				"parameters":  "[variables('vmParams')]"
 			},
             "dependsOn": [
-                "vnet"
+                "thisVnet"
             ]
 		}
     ]
