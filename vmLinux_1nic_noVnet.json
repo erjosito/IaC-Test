@@ -62,7 +62,7 @@
         }
     },
     "variables": {
-        "deploymentApiVersion": "2017-05-10",
+        "deploymentApiVersion": "2017-08-01",
         "networkApiVersion": "2017-09-01",
         "computeApiVersion": "2017-03-30",   
         "settingsTable": {
@@ -139,7 +139,7 @@
 			"comments": "Optionally, create an internal load balancer",
             "name": "slb-int",
 			"type": "Microsoft.Resources/deployments",
-			"apiVersion": "[variables('networkApiVersion')]",
+			"apiVersion": "[variables('deploymentApiVersion')]",
 			"properties": {
 				"mode": "Incremental",
 				"templateLink": {
@@ -153,7 +153,7 @@
 			"comments": "Optionally, create an external load balancer. Wait until the internal has been created, there seems to be some conflict when creating both at the same time",
             "name": "slb-ext",
 			"type": "Microsoft.Resources/deployments",
-			"apiVersion": "[variables('networkApiVersion')]",
+			"apiVersion": "[variables('deploymentApiVersion')]",
 			"properties": {
 				"mode": "Incremental",
 				"templateLink": {
