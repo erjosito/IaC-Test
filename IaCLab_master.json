@@ -31,7 +31,8 @@
         }
     },
     "variables": {
-        "deploymentApi": "2017-05-10",
+        "deploymentApiVersion": "2017-05-10",
+        "networkApiVersion": "2017-09-01",        
         "baseRepoURL": "[concat('https://raw.githubusercontent.com/erjosito/IaC-Test/', parameters('repoBranch'), '/')]",
         "storageAccountName": "[concat('storage', uniqueString(resourceGroup().id))]",
         "vnetTemplateUri": "[concat(variables('baseRepoURL'), 'vnet3Subnets.json')]",
@@ -41,6 +42,10 @@
             "subnetNamePrefix": { "value": "subnet" },
             "vnetOctets12": { "value": "10.1." }
         },
+        "vnetOctets12": "10.1.",
+        "subnetName": "subnet1",
+        "vnetSpace": "[concat(variables('vnetOctets12'), '0.0/16')]",
+        "subnetPrefix": "[concat(variables('vnetOctets12'), '1.0/24')]",        
         "customScript": "ubuntu_vm_config",
         "customScriptUri": "[concat(variables('baseRepoURL'), variables('customScript'))]",
         "customScriptCmd": "[concat('chmod 666 ', variables('customScript'), ' && /bin/sh ./', variables('customScript'))]",
@@ -67,25 +72,35 @@
         }
     },
     "resources": [
-		{
-			"comments": "Create a vnet, 3 standard subnets, no gateway subnet",
-            "name": "thisVnet",
-			"type": "Microsoft.Resources/deployments",
-			"apiVersion": "[variables('deploymentApi')]",
-			"properties": {
-				"mode": "Incremental",
-				"templateLink": {
-					"uri": "[variables('vnetTemplateUri')[parameters('vmType')]]",
-					"contentVersion": "1.0.0.0"
-				},
-				"parameters": "[variables('vnetParams')]"
-			}
-		},
+        {
+            "comments": "Create Vnet with three subnets and one gateway subnet",
+            "type": "Microsoft.Network/virtualNetworks",
+            "name": "[variables('vnetName')]",
+            "apiVersion": "[variables('networkApiVersion')]",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "[variables('vnetSpace')]"
+                    ]
+                },
+                "subnets": [
+                    {
+                        "name": "[variables('subnetName')]",
+                        "properties": {
+                            "addressPrefix": "[variables('subnetPrefix')]"
+                        }
+                    }
+                ]
+            },
+            "resources": [],
+            "dependsOn": []
+        },
 		{
 			"comments": "Create VMs",
             "name": "VMs",
 			"type": "Microsoft.Resources/deployments",
-			"apiVersion": "[variables('deploymentApi')]",
+			"apiVersion": "[variables('deploymentApiVersion')]",
 			"properties": {
 				"mode": "Incremental",
 				"templateLink": {
