@@ -18,12 +18,6 @@
             "allowedValues": [ "ubuntu","ubuntuScaleSet" ],
             "metadata": { "description": "Choose ubuntuScaleSet to deploy NVA in a scale set" }
         },
-        "createUDR": {
-            "defaultValue": "no",
-            "type": "string",
-            "allowedValues": [ "yes","no" ],
-            "metadata": { "description": "Whether UDRs should be configured (lab solution)" }
-        },
         "lbSku": {
             "defaultValue": "basic",
             "type": "string",
@@ -79,7 +73,7 @@
 			"properties": {
 				"mode": "Incremental",
 				"templateLink": {
-					"uri": "[variables('vnetTemplateUri')]",
+					"uri": "[variables('vnetTemplateUri')[parameters('vmType')]]",
 					"contentVersion": "1.0.0.0"
 				},
 				"parameters":  "[variables('vnetParams')]"
