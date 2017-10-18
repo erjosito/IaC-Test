@@ -75,6 +75,9 @@
         }
     },
     "variables": {
+        "deploymentApiVersion": "2017-05-10",
+        "networkApiVersion": "2017-09-01",
+        "computeApiVersion": "2017-03-30",   
         "settingsTable": {
             "ubuntu": {
                 "product": "UbuntuServer",
@@ -83,7 +86,7 @@
                 "vmSize": "Standard_D2_v2"
             }
         },
-        "nicUri": "concat(parameters('baseRepoURL'),'vmNic.json')",
+        "nicUri": "[concat(parameters('baseRepoURL'),'vmNic.json')]",
         "settings": "[variables('settingsTable')[parameters('vmType')]]",
         "avSetName": "[concat(parameters('vmName'),'AvSet')]",
         "slbName": "[concat(parameters('vmName'), '-slb')]",
@@ -157,6 +160,9 @@
                 "slbName": {
                     "value": "[concat(variables('slbName'), '-ext')]"
                 },
+                "lbSku": {
+                    "value": "[parameters('lbSku')]"
+                },
                 "backendConfigName": {
                     "value": "[concat(variables('slbBackendName'), '-ext')]"
                 },
@@ -183,17 +189,17 @@
     },
     "resources": [
 		{
-			"comments": "Availability set for eventual NVA HA",
+			"comments": "Availability set for eventual HA",
 			"type": "Microsoft.Compute/availabilitySets",
 			"name": "[variables('avSetName')]",
-			"apiVersion": "2016-03-30",
+			"apiVersion": "[variables('computeApiVersion')]",
 			"location": "[resourceGroup().location]"
 		},
 		{
 			"comments": "Optionally, create an internal load balancer",
             "name": "nva-slb-int",
 			"type": "Microsoft.Resources/deployments",
-			"apiVersion": "2016-06-01",
+			"apiVersion": "[variables('networkApiVersion')]",
 			"properties": {
 				"mode": "Incremental",
 				"templateLink": {
@@ -207,7 +213,7 @@
 			"comments": "Optionally, create an external load balancer. Wait until the internal has been created, there seems to be some conflict when creating both at the same time",
             "name": "nva-slb-ext",
 			"type": "Microsoft.Resources/deployments",
-			"apiVersion": "2016-06-01",
+			"apiVersion": "[variables('networkApiVersion')]",
 			"properties": {
 				"mode": "Incremental",
 				"templateLink": {
@@ -224,7 +230,7 @@
             "comments": "Deploy Linux VM as Virtual Network Appliance",
             "type": "Microsoft.Compute/virtualMachines",
             "name": "[concat(parameters('vmName'), '-', copyIndex(1))]",
-            "apiVersion": "2015-06-15",
+			"apiVersion": "[variables('computeApiVersion')]",
             "location": "[resourceGroup().location]",
             "properties": {
 				"availabilitySet": {
@@ -283,7 +289,7 @@
 			"comments": "Create eth0",
             "name": "[concat(parameters('vmName'), '-', copyIndex(1), '-nic0')]",
 			"type": "Microsoft.Resources/deployments",
-			"apiVersion": "2016-06-01",
+			"apiVersion": "[variables('deploymentApiVersion')]",
 			"properties": {
 				"mode": "Incremental",
 				"templateLink": {
