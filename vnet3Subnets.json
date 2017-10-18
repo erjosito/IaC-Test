@@ -16,7 +16,7 @@
         }
     },
     "variables": {
-        "apiVersion": "2016-03-30",
+        "apiVersion": "2017-09-01",
         "vnetSpace": "[concat(parameters('vnetOctets12'), '0.0/16')]"
     },
     "resources": [
