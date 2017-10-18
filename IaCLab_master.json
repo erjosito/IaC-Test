@@ -31,7 +31,7 @@
         }
     },
     "variables": {
-        "deploymentApiVersion": "2017-08-10",
+        "deploymentApiVersion": "2017-08-01",
         "networkApiVersion": "2017-09-01",
         "storageApiVersion": "2016-01-01",
         "baseRepoURL": "[concat('https://raw.githubusercontent.com/erjosito/IaC-Test/', parameters('repoBranch'), '/')]",
