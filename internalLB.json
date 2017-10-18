@@ -45,6 +45,12 @@
             "type": "int",
             "metadata": { "description": "TCP port that will configured in the TCP-based probe" }
         },
+        "lbSku": {
+            "defaultValue": "basic",
+            "type": "string",
+            "allowedValues": [ "basic","standard" ],
+            "metadata": { "description": "Whether Load Balancers should be Basic or Standard (preview)" }
+        },
         "ruleName": {
             "defaultValue": "ssh",
             "type": "string"
@@ -56,6 +62,7 @@
         }
     },
     "variables": {
+        "networkApiVersion": "2017-09-01",
 		"vip": "[concat(parameters('ipPrefix'), '.', parameters('vipSuffix'))]",
 		"frontendConfigName": "myFrontendConfig",
 		"probeName": "myProbe",
@@ -73,6 +80,9 @@
             "name": "[parameters('slbName')]",
             "apiVersion": "2016-03-30",
             "location": "[resourceGroup().location]",
+            "sku": {
+                "name": "[parameters('lbSku')]"
+            },
             "properties": {
                 "frontendIPConfigurations": [
                     {

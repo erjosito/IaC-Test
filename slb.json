@@ -65,7 +65,7 @@
             "metadata": { "description": "Whether Load Balancers should be Basic or Standard (preview)" }
         },
         "baseRepoURL": {
-            "defaultValue": "https://raw.githubusercontent.com/erjosito/azure-networking-lab/master/",
+            "defaultValue": "https://raw.githubusercontent.com/erjosito/IaC-Test/master/",
             "type": "string",
             "metadata": { "description": "URL where the nested templates are downloaded from" }    
         }
@@ -76,15 +76,13 @@
 			"internal": "[concat(parameters('baseRepoURL'), 'internalLB.json')]",
 			"external": "[concat(parameters('baseRepoURL'), 'externalLB.json')]"
 		},
-		"LBTemplateURI": "[variables('deployLBTemplate')[parameters('externalInternal')]]",
-		"LBStandardTemplateURI": "[concat(parameters('baseRepoURL'), 'internalLB_standard.json')]"
+		"LBTemplateURI": "[variables('deployLBTemplate')[parameters('externalInternal')]]"
     },
 
 
     "resources": [
 		{
             "comments": "Azure Load Balancer, Basic SKU, internal or external",
-            "condition": "[equals(parameters('lbSku'), 'basic')]",
 			"name": "AzureLBbasic",
 			"type": "Microsoft.Resources/deployments",
 			"apiVersion": "2016-06-01",
@@ -98,34 +96,7 @@
                     "vnetName": { "value": "[parameters('vnetName')]" },
                     "subnetName": { "value": "[parameters('subnetName')]"},
                     "slbName": { "value": "[parameters('slbName')]" },
-                    "backendPort": { "value": "[parameters('backendPort')]"},
-                    "frontendPort": { "value": "[parameters('frontendPort')]"},
-                    "probePort": { "value": "[parameters('probePort')]"},
-                    "ruleName": { "value": "[parameters('ruleName')]"},
-                    "dsr": { "value": "[parameters('dsr')]"},
-                    "backendConfigName": { "value": "[parameters('backendConfigName')]"},
-                    "ipPrefix": { "value": "[parameters('ipPrefix')]"},
-                    "vipSuffix": { "value": "[parameters('vipSuffix')]"},
-                    "pipName": { "value": "[parameters('pipName')]"}
-                }
-			}
-        },
-		{
-            "comments": "Azure Load Balancer, Standard SKU, internal",
-            "condition": "[equals(parameters('lbSku'), 'standard')]",
-			"name": "AzureLBstandard",
-			"type": "Microsoft.Resources/deployments",
-			"apiVersion": "2016-06-01",
-			"properties": {
-				"mode": "Incremental",
-				"templateLink": {
-					"uri": "[variables('LBStandardTemplateURI')]",
-					"contentVersion": "1.0.0.0"
-				},
-				"parameters":  {
-                    "vnetName": { "value": "[parameters('vnetName')]" },
-                    "subnetName": { "value": "[parameters('subnetName')]"},
-                    "slbName": { "value": "[parameters('slbName')]" },
+                    "lbSku": { "value": "[parameters('lbSku')]"},
                     "backendPort": { "value": "[parameters('backendPort')]"},
                     "frontendPort": { "value": "[parameters('frontendPort')]"},
                     "probePort": { "value": "[parameters('probePort')]"},

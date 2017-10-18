@@ -49,6 +49,12 @@
             "defaultValue": "ssh",
             "type": "string"
         },
+        "lbSku": {
+            "defaultValue": "basic",
+            "type": "string",
+            "allowedValues": [ "basic","standard" ],
+            "metadata": { "description": "Whether Load Balancers should be Basic or Standard (preview)" }
+        },
         "dsr": {
             "defaultValue": "false",
             "type": "string",
@@ -56,6 +62,7 @@
         }
     },
     "variables": {
+        "networkApiVersion": "2017-09-01",
 		"frontendConfigName": "myFrontendConfig",
 		"probeName": "myProbe",
         "dsrBoolHash": {
@@ -69,7 +76,7 @@
             "comments": "Public IP address",
             "type": "Microsoft.Network/publicIPAddresses",
             "name": "[parameters('pipName')]",
-            "apiVersion": "2016-03-30",
+            "apiVersion": "[variables('networkApiVersion')]",
             "location": "[resourceGroup().location]",
             "properties": {
                 "publicIPAllocationMethod": "Dynamic",
@@ -82,7 +89,7 @@
             "comments": "External Load Balancer",
             "type": "Microsoft.Network/loadBalancers",
             "name": "[parameters('slbName')]",
-            "apiVersion": "2016-03-30",
+            "apiVersion": "[variables('networkApiVersion')]",
             "location": "[resourceGroup().location]",
             "properties": {
                 "frontendIPConfigurations": [

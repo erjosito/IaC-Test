@@ -139,6 +139,9 @@
         "lbTemplateParametersInt": "[variables('lbTemplateParametersIntHash')[parameters('deployLBYesNo')]]",
         "lbTemplateParametersExtHash": {
             "yes": {
+                "baseRepoUrl": {
+                    "value": "[parameters('baseRepoURL')]"
+                },
                 "externalInternal": {
                     "value": "external"
                 },

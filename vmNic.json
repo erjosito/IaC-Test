@@ -36,7 +36,7 @@
         }
     },
     "variables": {
-		"apiVersion": "2016-03-30",
+        "networkApiVersion": "2017-09-01",        
         "nsgName": "[concat(parameters('nicName'), '-nsg')]",
         "pipName": "[concat(parameters('nicName'), '-pip')]",
         "nicIpConfigHash": {
@@ -105,7 +105,7 @@
             "condition": "[equals(parameters('pipYesNo'), 'yes')]",            
             "type": "Microsoft.Network/publicIPAddresses",
             "name": "[variables('pipName')]",
-            "apiVersion": "[variables('apiVersion')]",
+            "apiVersion": "[variables('networkApiVersion')]",
             "location": "[resourceGroup().location]",
             "properties": {
                 "publicIPAllocationMethod": "Dynamic",
@@ -118,7 +118,7 @@
 			"comments": "NSGs not required, but here for extra security",
             "type": "Microsoft.Network/networkSecurityGroups",
             "name": "[variables('nsgName')]",
-            "apiVersion": "[variables('apiVersion')]",
+            "apiVersion": "[variables('networkApiVersion')]",
             "location": "[resourceGroup().location]",
             "properties": {
                 "securityRules": [
@@ -157,7 +157,7 @@
 			"comments": "NICs created with dynamic IP addresses",
             "type": "Microsoft.Network/networkInterfaces",
             "name": "[parameters('nicName')]",
-            "apiVersion": "[variables('apiVersion')]",
+            "apiVersion": "[variables('networkApiVersion')]",
             "location": "[resourceGroup().location]",
             "properties": {
                 "ipConfigurations": [
