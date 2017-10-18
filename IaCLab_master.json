@@ -68,7 +68,7 @@
     "resources": [
 		{
 			"comments": "Create a vnet, 3 standard subnets, no gateway subnet",
-            "name": "vnet",
+            "name": "thisVnet",
 			"type": "Microsoft.Resources/deployments",
 			"apiVersion": "2016-06-01",
 			"properties": {
