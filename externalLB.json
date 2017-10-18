@@ -78,6 +78,9 @@
             "name": "[parameters('pipName')]",
             "apiVersion": "[variables('networkApiVersion')]",
             "location": "[resourceGroup().location]",
+            "sku": {
+                "name": "[parameters('lbSku')]"
+            },
             "properties": {
                 "publicIPAllocationMethod": "Dynamic",
                 "idleTimeoutInMinutes": 4
