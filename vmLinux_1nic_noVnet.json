@@ -93,45 +93,19 @@
 		"lbTemplateUri": "[variables('lbTemplateUriHash')[parameters('deployLBYesNo')]]",
         "lbTemplateParametersIntHash": {
             "yes": {
-                "baseRepoURL": {
-                    "value": "[parameters('baseRepoURL')]"
-                },
-                "externalInternal": {
-                    "value": "internal"
-                },
-                "vnetName": {
-                    "value": "[parameters('vnetName')]"
-                },
-                "subnetName": {
-                    "value": "[variables('slbSubnet')]"
-                },
-                "slbName": {
-                    "value": "[concat(variables('slbName'), '-int')]"
-                },
-                "lbSku": {
-                    "value": "[parameters('lbSku')]"
-                },
-                "backendConfigName": {
-                    "value": "[concat(variables('slbBackendName'), '-int')]"
-                },
-                "ipPrefix": {
-                    "value": "[variables('ipPrefix')]"
-                },
-                "vipSuffix": {
-                    "value": "[variables('vipSuffix')]"
-                },
-                "probePort": {
-                    "value": 1138
-                },
-                "frontendPort": {
-                    "value": 22
-                },
-                "backendPort": {
-                    "value": 22
-                },
-                "ruleName": {
-                    "value": "ssh"
-                }
+                "baseRepoURL": { "value": "[parameters('baseRepoURL')]" },
+                "externalInternal": { "value": "internal" },
+                "vnetName": { "value": "[parameters('vnetName')]" },
+                "subnetName": { "value": "[variables('slbSubnet')]" },
+                "slbName": { "value": "[concat(variables('slbName'), '-int')]" },
+                "lbSku": { "value": "[parameters('lbSku')]" },
+                "backendConfigName": { "value": "[concat(variables('slbBackendName'), '-int')]" },
+                "ipPrefix": { "value": "[variables('ipPrefix')]" },
+                "vipSuffix": { "value": "[variables('vipSuffix')]" },
+                "probePort": { "value": 1138 },
+                "frontendPort": { "value": 22 },
+                "backendPort": { "value": 22 },
+                "ruleName": { "value": "ssh" }
             },
             "no": {
             }
@@ -139,42 +113,18 @@
         "lbTemplateParametersInt": "[variables('lbTemplateParametersIntHash')[parameters('deployLBYesNo')]]",
         "lbTemplateParametersExtHash": {
             "yes": {
-                "baseRepoUrl": {
-                    "value": "[parameters('baseRepoURL')]"
-                },
-                "externalInternal": {
-                    "value": "external"
-                },
-                "vnetName": {
-                    "value": "[parameters('vnetName')]"
-                },
-                "subnetName": {
-                    "value": "[variables('slbSubnet')]"
-                },
-                "slbName": {
-                    "value": "[concat(variables('slbName'), '-ext')]"
-                },
-                "lbSku": {
-                    "value": "[parameters('lbSku')]"
-                },
-                "backendConfigName": {
-                    "value": "[concat(variables('slbBackendName'), '-ext')]"
-                },
-                "pipName": {
-                    "value": "[concat(variables('slbPipName'), '-ext')]"
-                },
-                "probePort": {
-                    "value": 1139
-                },
-                "frontendPort": {
-                    "value": 1022
-                },
-                "backendPort": {
-                    "value": 22
-                },
-                "ruleName": {
-                    "value": "ssh"
-                }
+                "baseRepoUrl": { "value": "[parameters('baseRepoURL')]" },
+                "externalInternal": { "value": "external" },
+                "vnetName": { "value": "[parameters('vnetName')]" },
+                "subnetName": { "value": "[variables('slbSubnet')]" },
+                "slbName": { "value": "[concat(variables('slbName'), '-ext')]" },
+                "lbSku": { "value": "[parameters('lbSku')]" },
+                "backendConfigName": { "value": "[concat(variables('slbBackendName'), '-ext')]" },
+                "pipName": { "value": "[concat(variables('slbPipName'), '-ext')]" },
+                "probePort": { "value": 1139 },
+                "frontendPort": { "value": 1022 },
+                "backendPort": { "value": 22 },
+                "ruleName": { "value": "ssh" }
             },
             "no": {
             }
