@@ -16,7 +16,7 @@
             "defaultValue": "ubuntu",
             "type": "string",
             "allowedValues": [ "ubuntu","ubuntuScaleSet" ],
-            "metadata": { "description": "Choose ubuntuScaleSet to deploy NVA in a scale set" }
+            "metadata": { "description": "Choose ubuntuScaleSet to deploy ubuntu in a scale set" }
         },
         "lbSku": {
             "defaultValue": "basic",
@@ -33,12 +33,13 @@
     "variables": {
         "baseRepoURL": "[concat('https://raw.githubusercontent.com/erjosito/IaC-Test/', parameters('repoBranch'), '/')]",
         "storageAccountName": "[concat('storage', uniqueString(resourceGroup().id))]",
+        "vnetTemplateUri": "[concat(variables('baseRepoURL'), 'vnet3Subnets.json')]",
+        "vnetName": "myVnet",
         "vnetParams": {
-            "vnetName": { "value": "vnet" },
+            "vnetName": { "value": "[variables('vnetName')]" },
             "subnetNamePrefix": { "value": "subnet" },
             "vnetOctets12": { "value": "10.1." }
         },
-        "vnetTemplateUri": "[concat(variables('baseRepoURL'), 'vnet3Subnets.json')]",
         "customScript": "ubuntu_vm_config",
         "customScriptUri": "[concat(variables('baseRepoURL'), variables('customScript'))]",
         "customScriptCmd": "[concat('chmod 666 ', variables('customScript'), ' && /bin/sh ./', variables('customScript'))]",
@@ -47,7 +48,7 @@
             "vmType": { "value": "ubuntu" },
             "vmCount": { "value": 2 },
             "vmName": { "value": "my_vm" },
-            "vnetName": { "value": "myVnet" },
+            "vnetName": { "value": "[variables('vnetName')]" },
             "storageAccountName": { "value": "[variables('storageAccountName')]" },
             "subnet0Name": { "value": "myVnet4subnet1" },
             "pipName": { "value": "nvaPip" },
@@ -76,7 +77,7 @@
 					"uri": "[variables('vnetTemplateUri')[parameters('vmType')]]",
 					"contentVersion": "1.0.0.0"
 				},
-				"parameters":  "[variables('vnetParams')]"
+				"parameters": "[variables('vnetParams')]"
 			}
 		},
 		{
