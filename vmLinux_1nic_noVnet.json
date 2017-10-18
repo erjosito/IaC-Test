@@ -40,14 +40,14 @@
             "type": "string"
         },
         "scriptUri": {
-            "defaultValue": "https://raw.githubusercontent.com/erjosito/IaC-Test/master/linux-vm-config.sh",
+            "defaultValue": "https://raw.githubusercontent.com/erjosito/IaC-Test/master/ubuntu-vm-config.sh",
             "type": "string",
-            "metadata": { "description": "Script that will be executed" }            
+            "metadata": { "description": "Script that will be executed" }
         },
         "scriptCmd": {
             "defaultValue": "sh linuxNVAconfig.sh",
             "type": "string",
-            "metadata": { "description": "Command to run the script" }            
+            "metadata": { "description": "Command to run the script" }
         },
 		"deployLBYesNo": {
 			"defaultValue": "yes",
@@ -62,7 +62,7 @@
         "baseRepoURL": {
             "defaultValue": "https://raw.githubusercontent.com/erjosito/Iac-Test/master/",
             "type": "string",
-            "metadata": { "description": "URL where the nested templates are downloaded from" }    
+            "metadata": { "description": "URL where the nested templates are downloaded from" }
         }
     },
     "variables": {
