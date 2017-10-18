@@ -34,8 +34,8 @@
         "baseRepoURL": "[concat('https://raw.githubusercontent.com/erjosito/IaC-Test/', parameters('repoBranch'), '/')]",
         "storageAccountName": "[concat('storage', uniqueString(resourceGroup().id))]",
         "vnetParams": {
-            "baseRepoURL": { "value": "[variables('baseRepoURL')]" },
-            "vnetName": { "value": "myVnet" },
+            "vnetName": { "value": "vnet" },
+            "subnetNamePrefix": { "value": "subnet" },
             "vnetOctets12": { "value": "10.1." }
         },
         "vnetTemplateUri": "[concat(variables('baseRepoURL'), 'vnet3Subnets.json')]",

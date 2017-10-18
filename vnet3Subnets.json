@@ -13,11 +13,6 @@
         "subnetNamePrefix": {
             "defaultValue": "Subnet",
             "type": "string"
-        },
-        "baseRepoURL": {
-            "defaultValue": "https://raw.githubusercontent.com/erjosito/azure-networking-lab/master/",
-            "type": "string",
-            "metadata": { "description": "URL where the nested templates are downloaded from" }    
         }
     },
     "variables": {
