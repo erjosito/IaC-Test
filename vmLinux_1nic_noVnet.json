@@ -49,6 +49,10 @@
 			"defaultValue": "yes",
 			"type": "string"
 		},
+		"pipYesNo": {
+			"defaultValue": "yes",
+			"type": "string"
+		},
         "lbSku": {
             "defaultValue": "basic",
             "type": "string",
@@ -242,7 +246,7 @@
                     "subnetName": { "value": "[parameters('subnet0Name')]"},
                     "slbName": { "value": "[concat(variables('slbName'), '-int')]"},
                     "slbYesNo": { "value": "[parameters('deployLBYesNo')]"},
-                    "pipYesNo": { "value": "no"}
+                    "pipYesNo": { "value": "[parameters('pipYesNo')]"}
                 }
             },
             "dependsOn": [  

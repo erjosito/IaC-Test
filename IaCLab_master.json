@@ -18,6 +18,14 @@
             "allowedValues": [ "ubuntu","ubuntuScaleSet" ],
             "metadata": { "description": "Choose ubuntuScaleSet to deploy ubuntu in a scale set" }
         },
+		"deployLBYesNo": {
+			"defaultValue": "yes",
+			"type": "string"
+		},
+		"pipYesNo": {
+			"defaultValue": "yes",
+			"type": "string"
+		},
         "lbSku": {
             "defaultValue": "basic",
             "type": "string",
@@ -54,7 +62,8 @@
             "subnet0Name": { "value": "[variables('subnetName')]" },
             "vmUsr": { "value": "[parameters('adminUsername')]" },
             "vmPwd": { "value": "[parameters('adminPassword')]" },
-            "deployLBYesNo": { "value": "no" },
+            "deployLBYesNo": { "value": "[parameters('deployLBYesNo')]" },
+            "pipYesNo": { "value": "[parameters('pipYesNo')]" },
             "lbSku": { "value": "[parameters('lbSku')]" },
             "scriptUri": { "value": "[variables('customScriptUri')]" },
             "scriptCmd": { "value": "[variables('customScriptCmd')]" }
