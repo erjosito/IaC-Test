@@ -20,11 +20,18 @@
         },
 		"deployLBYesNo": {
 			"defaultValue": "yes",
-			"type": "string"
+			"type": "string",
+            "allowedValues": [ "yes","no" ]
 		},
 		"pipYesNo": {
 			"defaultValue": "yes",
-			"type": "string"
+			"type": "string",
+            "allowedValues": [ "yes","no" ]
+		},
+		"azYesNo": {
+			"defaultValue": "yes",
+			"type": "string",
+            "allowedValues": [ "yes","no" ]
 		},
         "lbSku": {
             "defaultValue": "basic",
@@ -64,6 +71,7 @@
             "vmPwd": { "value": "[parameters('adminPassword')]" },
             "deployLBYesNo": { "value": "[parameters('deployLBYesNo')]" },
             "pipYesNo": { "value": "[parameters('pipYesNo')]" },
+            "azYesNo": { "value": "[parameters('azYesNo')]" },
             "lbSku": { "value": "[parameters('lbSku')]" },
             "scriptUri": { "value": "[variables('customScriptUri')]" },
             "scriptCmd": { "value": "[variables('customScriptCmd')]" }

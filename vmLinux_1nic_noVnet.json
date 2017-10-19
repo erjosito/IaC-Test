@@ -47,11 +47,18 @@
         },
 		"deployLBYesNo": {
 			"defaultValue": "yes",
-			"type": "string"
+			"type": "string",
+            "allowedValues": [ "yes","no" ]
 		},
 		"pipYesNo": {
 			"defaultValue": "yes",
-			"type": "string"
+			"type": "string",
+            "allowedValues": [ "yes","no" ]
+		},
+		"azYesNo": {
+			"defaultValue": "yes",
+			"type": "string",
+            "allowedValues": [ "yes","no" ]
 		},
         "lbSku": {
             "defaultValue": "basic",
@@ -208,7 +215,8 @@
             ]
 		},
         {
-            "comments": "Deploy Linux VM",
+            "comments": "Deploy Linux VM with AZs",
+            "condition": "[equals(parameters('azYesNo'), 'yes')]",
             "type": "Microsoft.Compute/virtualMachines",
             "name": "[concat(parameters('vmName'), '-', copyIndex(1))]",
 			"apiVersion": "[variables('computeApiVersion')]",
@@ -220,7 +228,82 @@
                 "hardwareProfile": {
                     "vmSize": "[variables('settings')['vmSize']]"
                 },
-				"storageProfile": "[variables('vmStorageProfile')]",
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "Canonical",
+                        "offer": "UbuntuServer",
+                        "sku": "16.04.0-LTS",
+                        "version": "latest"
+                    },
+                    "osDisk": {
+                        "osType": "Linux",
+                        "caching": "ReadWrite",
+                        "name": "[concat(parameters('vmName'), '-', copyIndex(1), '-disk')]",
+                        "diskSizeGb": "[variables('diskSize')]",
+                        "createOption": "FromImage",
+                        "managedDisk": {
+                            "storageAccountType": "[variables('diskType')]"
+                        }
+                    },
+                    "dataDisks": []
+                },        
+                "osProfile": "[variables('vmOsProfile')]",
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(parameters('vmName'), '-', copyIndex(1), '-nic0'))]",
+                            "properties": {
+                                "primary": true
+                            }
+                        }
+                    ]
+                }
+            },
+            "resources": [],
+            "copy": {
+                "name": "[parameters('vmName')]",
+                "count": "[parameters('vmCount')]"
+            },
+            "zones": [
+                "[copyIndex(1)]"
+            ],
+            "dependsOn": [
+                "[concat(parameters('vmName'), '-nic0')]", "[variables('avSetName')]"
+            ]
+        },
+        {
+            "comments": "Deploy Linux VM without AZs",
+            "condition": "[equals(parameters('azYesNo'), 'no')]",
+            "type": "Microsoft.Compute/virtualMachines",
+            "name": "[concat(parameters('vmName'), '-', copyIndex(1))]",
+			"apiVersion": "[variables('computeApiVersion')]",
+            "location": "[resourceGroup().location]",
+            "properties": {
+				"availabilitySet": {
+					"id": "[resourceId('Microsoft.Compute/availabilitySets', variables('avSetName'))]"
+				},
+                "hardwareProfile": {
+                    "vmSize": "[variables('settings')['vmSize']]"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "Canonical",
+                        "offer": "UbuntuServer",
+                        "sku": "16.04.0-LTS",
+                        "version": "latest"
+                    },
+                    "osDisk": {
+                        "osType": "Linux",
+                        "caching": "ReadWrite",
+                        "name": "[concat(parameters('vmName'), '-', copyIndex(1), '-disk')]",
+                        "diskSizeGb": "[variables('diskSize')]",
+                        "createOption": "FromImage",
+                        "managedDisk": {
+                            "storageAccountType": "[variables('diskType')]"
+                        }
+                    },
+                    "dataDisks": []
+                },
                 "osProfile": "[variables('vmOsProfile')]",
                 "networkProfile": {
                     "networkInterfaces": [
