@@ -69,6 +69,37 @@
         "deploymentApiVersion": "2017-08-01",
         "networkApiVersion": "2017-09-01",
         "computeApiVersion": "2017-03-30",   
+		"diskType": "Standard_LRS",
+        "diskSize": 32,
+		"diskName": "[concat(parameters('vmName'),'-osDisk')]",        
+        "vmStorageProfile": {
+            "imageReference": {
+                "publisher": "Canonical",
+                "offer": "UbuntuServer",
+                "sku": "16.04.0-LTS",
+                "version": "latest"
+            },
+            "osDisk": {
+                "osType": "Linux",
+                "caching": "ReadWrite",
+                "name": "[variables('diskName')]",
+                "diskSizeGb": "[variables('diskSize')]",
+                "createOption": "FromImage",
+                "managedDisk": {
+                    "storageAccountType": "[variables('diskType')]"
+                }
+            },
+            "dataDisks": []
+        },
+        "vmOsProfile": {
+            "computerName": "[parameters('vmName')]",
+            "adminUsername": "[parameters('vmUsr')]",
+            "linuxConfiguration": {
+                "disablePasswordAuthentication": false
+            },
+            "secrets": [],
+            "adminPassword": "[parameters('vmPwd')]"				
+        },
         "settingsTable": {
             "ubuntu": {
                 "product": "UbuntuServer",
@@ -183,32 +214,8 @@
                 "hardwareProfile": {
                     "vmSize": "[variables('settings')['vmSize']]"
                 },
-                "storageProfile": {
-                    "imageReference": {
-                        "publisher": "[variables('settings')['publisher']]",
-                        "offer": "[variables('settings')['product']]",
-                        "sku": "[variables('settings')['sku']]",
-                        "version": "latest"
-                    },
-                    "osDisk": {
-                        "name": "[concat(parameters('vmName'), '-', copyIndex(1),'-disk')]",
-                        "createOption": "FromImage",
-                        "vhd": {
-                            "uri": "[concat('http', '://', parameters('storageAccountName'), '.blob.core.windows.net', concat('/vhds/', parameters('vmName'), '-', copyIndex(1),'-disk.vhd'))]"
-                        },
-                        "caching": "ReadWrite"
-                    },
-                    "dataDisks": []
-                },
-                "osProfile": {
-                    "computerName": "[concat(parameters('vmName'), '-', copyIndex(1))]",
-                    "adminUsername": "[parameters('vmUsr')]",
-                    "linuxConfiguration": {
-                        "disablePasswordAuthentication": false
-                    },
-                    "secrets": [],
-                    "adminPassword": "[parameters('vmPwd')]"
-                },
+				"storageProfile": "[variables('vmStorageProfile')]",
+                "osProfile": "[variables('vmOsProfile')]",
                 "networkProfile": {
                     "networkInterfaces": [
                         {
