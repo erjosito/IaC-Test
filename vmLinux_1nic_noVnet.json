@@ -71,7 +71,6 @@
         "computeApiVersion": "2017-03-30",   
 		"diskType": "Standard_LRS",
         "diskSize": 32,
-		"diskName": "[concat(parameters('vmName'),'-osDisk')]",        
         "vmStorageProfile": {
             "imageReference": {
                 "publisher": "Canonical",
@@ -82,7 +81,7 @@
             "osDisk": {
                 "osType": "Linux",
                 "caching": "ReadWrite",
-                "name": "[variables('diskName')]",
+                "name": "[concat(parameters('vmName'), '-disk')]",
                 "diskSizeGb": "[variables('diskSize')]",
                 "createOption": "FromImage",
                 "managedDisk": {
