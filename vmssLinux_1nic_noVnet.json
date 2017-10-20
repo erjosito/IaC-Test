@@ -10,10 +10,6 @@
             "defaultValue": "myVnet",
             "type": "string"
         },
-        "storageAccountName": {
-            "defaultValue": "[concat('storage',uniqueString(resourceGroup().id))]",
-            "type": "string"
-        },
         "vmType": {
             "defaultValue": "ubuntu",
             "type": "string",
@@ -51,44 +47,54 @@
             "defaultValue": "subnet1",
             "type": "string"
         },
-        "subnet1Name": {
-            "defaultValue": "subnet2",
-            "type": "string"
-        },
-        "ip0": {
-            "defaultValue": "10.0.0.10",
-            "type": "string",
-            "metadata": { "description": "This string will be completed with the copyIndex: .101, .102, etc" }
-        },
-        "ip1": {
-            "defaultValue": "10.0.1.10",
-            "type": "string",
-            "metadata": { "description": "This string will be completed with the copyIndex: .101, .102, etc" }
-        },
         "scriptUri": {
-            "defaultValue": "https://raw.githubusercontent.com/erjosito/azure-networking-lab/master/linuxNVAconfig.sh",
+            "defaultValue": "https://raw.githubusercontent.com/erjosito/IaC-Test/master/ubuntu-vm-config.sh",
             "type": "string",
-            "metadata": { "description": "Script that will be executed" }            
+            "metadata": { "description": "Script that will be executed" }
         },
         "scriptCmd": {
             "defaultValue": "sh linuxNVAconfig.sh",
             "type": "string",
-            "metadata": { "description": "Command to run the script" }            
+            "metadata": { "description": "Command to run the script" }
         },
 		"deployLBYesNo": {
-			"defaultValue": "no",
+			"defaultValue": "yes",
+			"type": "string",
+            "allowedValues": [ "yes","no" ]
+		},
+		"ipPrefix": {
+			"defaultValue": "10.0.0",
 			"type": "string"
 		},
-        "baseRepoURL": {
-            "defaultValue": "https://raw.githubusercontent.com/erjosito/azure-networking-lab/master/",
+		"vipSuffix": {
+			"defaultValue": "10.0.0",
+			"type": "string"
+		},
+		"pipYesNo": {
+			"defaultValue": "yes",
+			"type": "string",
+            "allowedValues": [ "yes","no" ]
+		},
+		"azYesNo": {
+			"defaultValue": "yes",
+			"type": "string",
+            "allowedValues": [ "yes","no" ]
+		},
+        "lbSku": {
+            "defaultValue": "basic",
             "type": "string",
-            "metadata": { "description": "URL where the nested templates are downloaded from" }    
+            "allowedValues": [ "basic","standard" ],
+            "metadata": { "description": "Whether Load Balancers should be Basic or Standard (preview)" }
+        },
+        "baseRepoURL": {
+            "defaultValue": "https://raw.githubusercontent.com/erjosito/Iac-Test/master/",
+            "type": "string",
+            "metadata": { "description": "URL where the nested templates are downloaded from" }
         }
     },
     "variables": {
         "vnetID": "[resourceId('Microsoft.Network/virtualNetworks', parameters('vnetName'))]",
         "subnet0Id": "[concat(variables('vnetID'), '/subnets/', parameters('subnet0Name'))]",
-        "subnet1Id": "[concat(variables('vnetID'), '/subnets/', parameters('subnet1Name'))]",
         "settingsTable": {
             "ubuntu": {
                 "product": "UbuntuServer",
@@ -111,42 +117,19 @@
 		"LBTemplateURI": "[variables('deployLBTemplate')[parameters('deployLBYesNo')]]",
         "deployLBintParametersHash": {
             "yes": {
-                "externalInternal": {
-                    "value": "internal"
-                },
-                "vnetName": {
-                    "value": "[parameters('vnetName')]"
-                },
-                "subnetName": {
-                    "value": "[variables('slbSubnet')]"
-                },
-                "slbName": {
-                    "value": "[concat(variables('slbName'), '-int')]"
-                },
-                "backendConfigName": {
-                    "value": "[concat(variables('slbBackendName'), '-int')]"
-                },
-                "ipPrefix": {
-                    "value": "[variables('ipPrefix')]"
-                },
-                "vipSuffix": {
-                    "value": "[variables('vipSuffix')]"
-                },
-                "probePort": {
-                    "value": 1138
-                },
-                "frontendPort": {
-                    "value": 22
-                },
-                "backendPort": {
-                    "value": 22
-                },
-                "ruleName": {
-                    "value": "ssh"
-                },
-                "dsr": {
-                    "value": "true"
-                }
+                "baseRepoURL": { "value": "[parameters('baseRepoURL')]" },
+                "externalInternal": { "value": "internal" },
+                "vnetName": { "value": "[parameters('vnetName')]" },
+                "subnetName": { "value": "[variables('slbSubnet')]" },
+                "slbName": { "value": "[concat(variables('slbName'), '-int')]" },
+                "lbSku": { "value": "[parameters('lbSku')]" },
+                "backendConfigName": { "value": "[concat(variables('slbBackendName'), '-int')]" },
+                "ipPrefix": { "value": "[parameters('ipPrefix')]" },
+                "vipSuffix": { "value": "[parameters('vipSuffix')]" },
+                "probePort": { "value": 1138 },
+                "frontendPort": { "value": 22 },
+                "backendPort": { "value": 22 },
+                "ruleName": { "value": "ssh" }
             },
             "no": {
             }
@@ -154,44 +137,31 @@
         "deployLBintParameters": "[variables('deployLBintParametersHash')[parameters('deployLBYesNo')]]",
         "deployLBextParametersHash": {
             "yes": {
-                "externalInternal": {
-                    "value": "external"
-                },
-                "vnetName": {
-                    "value": "[parameters('vnetName')]"
-                },
-                "subnetName": {
-                    "value": "[variables('slbSubnet')]"
-                },
-                "slbName": {
-                    "value": "[concat(variables('slbName'), '-ext')]"
-                },
-                "backendConfigName": {
-                    "value": "[concat(variables('slbBackendName'), '-ext')]"
-                },
-                "pipName": {
-                    "value": "[concat(variables('slbPipName'), '-ext')]"
-                },
-                "probePort": {
-                    "value": 1139
-                },
-                "frontendPort": {
-                    "value": 1022
-                },
-                "backendPort": {
-                    "value": 1022
-                },
-                "ruleName": {
-                    "value": "ssh"
-                },
-                "dsr": {
-                    "value": "true"
-                }
+                "baseRepoUrl": { "value": "[parameters('baseRepoURL')]" },
+                "externalInternal": { "value": "external" },
+                "vnetName": { "value": "[parameters('vnetName')]" },
+                "subnetName": { "value": "[variables('slbSubnet')]" },
+                "slbName": { "value": "[concat(variables('slbName'), '-ext')]" },
+                "lbSku": { "value": "[parameters('lbSku')]" },
+                "backendConfigName": { "value": "[concat(variables('slbBackendName'), '-ext')]" },
+                "pipName": { "value": "[concat(variables('slbPipName'), '-ext')]" },
+                "probePort": { "value": 1139 },
+                "frontendPort": { "value": 1022 },
+                "backendPort": { "value": 22 },
+                "ruleName": { "value": "ssh" }
             },
             "no": {
             }
         },
-        "deployLBextParameters": "[variables('deployLBextParametersHash')[parameters('deployLBYesNo')]]"
+        "deployLBextParameters": "[variables('deployLBextParametersHash')[parameters('deployLBYesNo')]]",
+        "loadBalancerBackendAddressPoolHash": {
+            "yes": {
+                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', concat(variables('slbName'), '-int')), '/backendAddressPools/', concat(variables('slbBackendName'), '-int'))]"                
+            },
+            "no": {
+            }
+        },
+        "loadBalancerBackendAddressPool": "[variables('loadBalancerBackendAddressPoolHash')[parameters('deployLBYesNo')]]"    
     },
     "resources": [
 		{
@@ -276,9 +246,7 @@
                                                     "id": "[variables('subnet0Id')]"
                                                 },
                                                 "loadBalancerBackendAddressPools": [
-                                                    {
-                                                        "id": "[concat(resourceId('Microsoft.Network/loadBalancers', concat(variables('slbName'), '-int')), '/backendAddressPools/', concat(variables('slbBackendName'), '-int'))]"
-                                                    }
+                                                    "[variables('loadBalancerBackendAddressPool')]"
                                                 ]
                                             }
                                         }
