@@ -132,7 +132,7 @@
                 "publicIPAllocationMethod": "Dynamic",
                 "idleTimeoutInMinutes": 4
             },
-            "zones": "variables['zones']",
+            "zones": "[variables('zones')]",
             "resources": [],
             "dependsOn": []
         },
