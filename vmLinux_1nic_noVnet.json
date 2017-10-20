@@ -75,7 +75,8 @@
     "variables": {
         "deploymentApiVersion": "2017-08-01",
         "networkApiVersion": "2017-09-01",
-        "computeApiVersion": "2017-03-30",   
+        "computeApiVersion": "2017-03-30",
+        "maxZonen": 3,   
 		"diskType": "Standard_LRS",
         "diskSize": 32,
         "vmStorageProfile": {
@@ -218,7 +219,7 @@
             "comments": "Deploy Linux VM with AZs",
             "condition": "[equals(parameters('azYesNo'), 'yes')]",
             "type": "Microsoft.Compute/virtualMachines",
-            "name": "[concat(parameters('vmName'), '-', copyIndex(1))]",
+            "name": "[concat(parameters('vmName'), '-az-', copyIndex(1))]",
 			"apiVersion": "[variables('computeApiVersion')]",
             "location": "[resourceGroup().location]",
             "properties": {
@@ -265,7 +266,7 @@
                 "count": "[parameters('vmCount')]"
             },
             "zones": [
-                "[copyIndex(1)]"
+                "[add(mod(copyIndex(1), variables('maxZonen')), 1)]"
             ],
             "dependsOn": [
                 "[concat(parameters('vmName'), '-nic0')]", "[variables('avSetName')]"
