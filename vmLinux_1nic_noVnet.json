@@ -272,7 +272,7 @@
                 "count": "[parameters('vmCount')]"
             },
             "zones": [
-                "[add(mod(copyIndex(1), variables('maxZonen')), 1)]"
+                "[string(add(mod(copyIndex(1), variables('maxZonen')), 1))]"
             ],
             "dependsOn": [
                 "[concat(parameters('vmName'), '-nic0')]", "[variables('avSetName')]"
@@ -351,7 +351,7 @@
                     "slbYesNo": { "value": "[parameters('deployLBYesNo')]"},
                     "pipYesNo": { "value": "[parameters('pipYesNo')]"},
                     "azYesNo": { "value": "[parameters('azYesNo')]"},
-                    "az": { "value": "[add(mod(copyIndex(1), variables('maxZonen')), 1)]"}
+                    "az": { "value": "[string(add(mod(copyIndex(1), variables('maxZonen')), 1))]"}
                 }
             },
             "dependsOn": [  
