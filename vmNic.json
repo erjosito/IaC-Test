@@ -108,11 +108,16 @@
                 }
             }
         },
-        "nicIpConfig": "[variables('nicIpConfigHash')[parameters('pipYesNo')][parameters('slbYesNo')]]"
+        "nicIpConfig": "[variables('nicIpConfigHash')[parameters('pipYesNo')][parameters('slbYesNo')]]",
+        "zonesHash": {
+            "yes": [ "[parameters('az')]"],
+            "no": [],
+        "zones": "[variables('zonesHash')[parameters('azYesNo')]]"
+        }
     },
     "resources": [
         {
-            "comments": "Public IP address",
+            "comments": "Public IP address with or without AZs",
             "condition": "[equals(parameters('pipYesNo'), 'yes')]",            
             "type": "Microsoft.Network/publicIPAddresses",
             "name": "[variables('pipName')]",
@@ -122,6 +127,7 @@
                 "publicIPAllocationMethod": "Dynamic",
                 "idleTimeoutInMinutes": 4
             },
+            "zones": "variables['zones']",
             "resources": [],
             "dependsOn": []
         },

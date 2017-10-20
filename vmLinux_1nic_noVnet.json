@@ -87,25 +87,6 @@
         "maxZonen": 3,   
 		"diskType": "Standard_LRS",
         "diskSize": 32,
-        "vmStorageProfile": {
-            "imageReference": {
-                "publisher": "Canonical",
-                "offer": "UbuntuServer",
-                "sku": "16.04.0-LTS",
-                "version": "latest"
-            },
-            "osDisk": {
-                "osType": "Linux",
-                "caching": "ReadWrite",
-                "name": "[concat(parameters('vmName'), '-disk')]",
-                "diskSizeGb": "[variables('diskSize')]",
-                "createOption": "FromImage",
-                "managedDisk": {
-                    "storageAccountType": "[variables('diskType')]"
-                }
-            },
-            "dataDisks": []
-        },
         "vmOsProfile": {
             "computerName": "[parameters('vmName')]",
             "adminUsername": "[parameters('vmUsr')]",
