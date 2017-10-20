@@ -176,7 +176,7 @@
             "dependsOn": []
         },
         {
-			"comments": "NIC created without AZ",
+			"comments": "NIC created",
             "type": "Microsoft.Network/networkInterfaces",
             "name": "[parameters('nicName')]",
             "apiVersion": "[variables('networkApiVersion')]",

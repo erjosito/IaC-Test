@@ -62,28 +62,34 @@
         "customScript": "ubuntu_vm_config.sh",
         "customScriptUri": "[concat(variables('baseRepoURL'), variables('customScript'))]",
         "customScriptCmd": "[concat('chmod 666 ', variables('customScript'), ' && /bin/sh ./', variables('customScript'))]",
-        "vmParams": {
-            "baseRepoURL": { "value": "[variables('baseRepoURL')]" },
-            "vmType": { "value": "[parameters('vmType')]" },
-            "vmCount": { "value": 2 },
-            "vmName": { "value": "myvm" },
-            "vnetName": { "value": "[variables('vnetName')]" },
-            "storageAccountName": { "value": "[variables('storageAccountName')]" },
-            "subnet0Name": { "value": "[variables('subnetName')]" },
-            "vmUsr": { "value": "[parameters('adminUsername')]" },
-            "vmPwd": { "value": "[parameters('adminPassword')]" },
-            "deployLBYesNo": { "value": "[parameters('deployLBYesNo')]" },
-            "ipPrefix": { "value": "[variables('ipPrefix')]" },
-            "vipSuffix": { "value": "[variables('vipSuffix')]" },
-            "pipYesNo": { "value": "[parameters('pipYesNo')]" },
-            "azYesNo": { "value": "[parameters('azYesNo')]" },
-            "lbSku": { "value": "[parameters('lbSku')]" },
-            "scriptUri": { "value": "[variables('customScriptUri')]" },
-            "scriptCmd": { "value": "[variables('customScriptCmd')]" }
+        "vmParamsHash": {
+            "ubuntu": { 
+                "baseRepoURL": { "value": "[variables('baseRepoURL')]" },
+                "vmType": { "value": "[parameters('vmType')]" },
+                "vmCount": { "value": 2 },
+                "vmName": { "value": "myvm" },
+                "vnetName": { "value": "[variables('vnetName')]" },
+                "storageAccountName": { "value": "[variables('storageAccountName')]" },
+                "subnet0Name": { "value": "[variables('subnetName')]" },
+                "vmUsr": { "value": "[parameters('adminUsername')]" },
+                "vmPwd": { "value": "[parameters('adminPassword')]" },
+                "deployLBYesNo": { "value": "[parameters('deployLBYesNo')]" },
+                "ipPrefix": { "value": "[variables('ipPrefix')]" },
+                "vipSuffix": { "value": "[variables('vipSuffix')]" },
+                "pipYesNo": { "value": "[parameters('pipYesNo')]" },
+                "azYesNo": { "value": "[parameters('azYesNo')]" },
+                "lbSku": { "value": "[parameters('lbSku')]" },
+                "scriptUri": { "value": "[variables('customScriptUri')]" },
+                "scriptCmd": { "value": "[variables('customScriptCmd')]" }
+            },
+            "ubuntuScaleSet": {
+
+            }
         },
+        "vmParams": "[variables('vmParamsHash')[parameters('vmType')]]",
         "vmTemplateUri": {
             "ubuntu": "[concat(variables('baseRepoURL'), 'vmLinux_1nic_noVnet.json')]",
-            "ubuntuScaleSet": "[concat(variables('baseRepoURL'), 'vmLinux_1nic_noVnet_ScaleSet_ILBonly.json')]"
+            "ubuntuScaleSet": "[concat(variables('baseRepoURL'), 'vmssLinux_1nic_noVnet.json')]"
         }
     },
     "resources": [
