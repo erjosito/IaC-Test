@@ -115,8 +115,8 @@
         },
         "zones": "[variables('zonesHash')[parameters('azYesNo')]]",
         "nicDependsOnHash": {
-            "yes": [ "[variables('nsgName')]", "[variables('pipName')]" ],
-            "no": [ "[variables('nsgName')]" ]
+            "yes": "[variables('pipName')]",
+            "no": ""
         },
         "nicDependsOn": "[variables('nicDependsOnHash')[parameters('pipYesNo')]]"
     },
@@ -194,7 +194,10 @@
                 }
             },
             "resources": [],
-            "dependsOn": "[variables('nicDependsOn')]"
+            "dependsOn": [
+                "[variables('nsgName')]",
+                "[variables('nicDependsOn')]"
+            ]
         }
     ]
 }
