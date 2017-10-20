@@ -343,7 +343,9 @@
                     "subnetName": { "value": "[parameters('subnet0Name')]"},
                     "slbName": { "value": "[concat(variables('slbName'), '-int')]"},
                     "slbYesNo": { "value": "[parameters('deployLBYesNo')]"},
-                    "pipYesNo": { "value": "[parameters('pipYesNo')]"}
+                    "pipYesNo": { "value": "[parameters('pipYesNo')]"},
+                    "azYesNo": { "value": "[parameters('azYesNo')]"},
+                    "az": { "value": "[add(mod(copyIndex(1), variables('maxZonen')), 1)]"}
                 }
             },
             "dependsOn": [  

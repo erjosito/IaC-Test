@@ -32,8 +32,19 @@
         },
         "pipYesNo": {
             "defaultValue": "no",
-            "type": "string"
-        }
+            "type": "string",
+            "allowedValues": [ "yes","no" ]
+        },
+		"azYesNo": {
+			"defaultValue": "no",
+			"type": "string",
+            "allowedValues": [ "yes","no" ]
+		},
+		"az": {
+			"defaultValue": "1",
+			"type": "string",
+            "allowedValues": [ "1","2","3" ]
+		}
     },
     "variables": {
         "networkApiVersion": "2017-09-01",        
@@ -153,8 +164,9 @@
             "resources": [],
             "dependsOn": []
         },
-       {
-			"comments": "NICs created with dynamic IP addresses",
+        {
+			"comments": "NIC created without AZ",
+            "condition": "[equals(parameters('azYesNo'), 'no')]",
             "type": "Microsoft.Network/networkInterfaces",
             "name": "[parameters('nicName')]",
             "apiVersion": "[variables('networkApiVersion')]",
@@ -172,6 +184,36 @@
                 }
             },
             "resources": [],
+            "zones": [
+                "[parameters('az')]"
+            ],
+            "dependsOn": [
+                "[variables('nsgName')]"
+            ]
+        },
+        {
+			"comments": "NIC created in AZ",
+            "condition": "[equals(parameters('azYesNo'), 'yes')]",
+            "type": "Microsoft.Network/networkInterfaces",
+            "name": "[concat(parameters('nicName'), '-az')]",
+            "apiVersion": "[variables('networkApiVersion')]",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "ipConfigurations": [
+                    "[variables('nicIpConfig')]"
+                ],
+                "dnsSettings": {
+                    "dnsServers": []
+                },
+                "enableIPForwarding": false,
+                "networkSecurityGroup": {
+                    "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('nsgName'))]"
+                }
+            },
+            "resources": [],
+            "zones": [
+                "[parameters('az')]"
+            ],
             "dependsOn": [
                 "[variables('nsgName')]"
             ]
