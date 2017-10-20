@@ -55,6 +55,14 @@
 			"type": "string",
             "allowedValues": [ "yes","no" ]
 		},
+		"ipPrefix": {
+			"defaultValue": "10.0.0",
+			"type": "string"
+		},
+		"vipSuffix": {
+			"defaultValue": "10.0.0",
+			"type": "string"
+		},
 		"azYesNo": {
 			"defaultValue": "yes",
 			"type": "string",
@@ -121,8 +129,6 @@
         "slbName": "[concat(parameters('vmName'), '-slb')]",
         "slbBackendName": "[concat(parameters('vmName'), '-slbBackend')]",
         "slbPipName": "[concat(parameters('vmName'), '-slbPip')]",
-        "ipPrefix": "10.4.2",
-        "vipSuffix": "100",
         "slbSubnet": "[parameters('subnet0Name')]",
 		"lbTemplateUriHash": {
 			"yes": "[concat(parameters('baseRepoURL'), 'slb.json')]",
@@ -138,8 +144,8 @@
                 "slbName": { "value": "[concat(variables('slbName'), '-int')]" },
                 "lbSku": { "value": "[parameters('lbSku')]" },
                 "backendConfigName": { "value": "[concat(variables('slbBackendName'), '-int')]" },
-                "ipPrefix": { "value": "[variables('ipPrefix')]" },
-                "vipSuffix": { "value": "[variables('vipSuffix')]" },
+                "ipPrefix": { "value": "[parameters('ipPrefix')]" },
+                "vipSuffix": { "value": "[parameters('vipSuffix')]" },
                 "probePort": { "value": 1138 },
                 "frontendPort": { "value": 22 },
                 "backendPort": { "value": 22 },
