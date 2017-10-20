@@ -335,7 +335,8 @@
                     "az": { "value": "[string(add(mod(copyIndex(1), variables('maxZonen')), 1))]"}
                 }
             },
-            "dependsOn": [  
+            "dependsOn": [
+                "slb-int"
             ],
             "copy": {
                 "name": "[concat(parameters('vmName'), '-nic0')]",
