@@ -5,7 +5,7 @@
             "adminUsername": { "value": "lab-user" },
             "adminPassword": { "value": "Microsoft123!" },
             "deployLBYesNo": { "value": "yes" },
-            "lbSku": { "value": "basic" },
+            "lbSku": { "value": "standard" },
             "pipYesNo": { "value": "yes" },
             "azYesNo": { "value": "yes" }
         }

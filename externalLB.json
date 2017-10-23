@@ -84,7 +84,7 @@
             "apiVersion": "[variables('networkApiVersion')]",
             "location": "[resourceGroup().location]",
             "sku": {
-                "name": "[variables('pipSku')]"
+                "name": "[parameters('lbSku')]"
             },
             "properties": {
                 "publicIPAllocationMethod": "Dynamic",
