@@ -44,7 +44,13 @@
 			"defaultValue": "1",
 			"type": "string",
             "allowedValues": [ "1","2","3" ]
-		}
+		},
+        "lbSku": {
+            "defaultValue": "basic",
+            "type": "string",
+            "allowedValues": [ "basic","standard" ],
+            "metadata": { "description": "Whether Load Balancers should be Basic or Standard (preview)" }
+        }
     },
     "variables": {
         "networkApiVersion": "2017-09-01",        
@@ -118,7 +124,13 @@
             "yes": "[variables('pipName')]",
             "no": ""
         },
-        "nicDependsOn": "[variables('nicDependsOnHash')[parameters('pipYesNo')]]"
+        "nicDependsOn": "[variables('nicDependsOnHash')[parameters('pipYesNo')]]",
+        "pipSku": "[parameters('lbSku')]",
+        "pipAllocationHash": {
+            "basic": "Dynamic",
+            "standard": "Static"
+        },
+        "pipAllocation": "[variables('pipAllocationHash')[variables('pipSku')]]"
     },
     "resources": [
         {
@@ -128,8 +140,11 @@
             "name": "[variables('pipName')]",
             "apiVersion": "[variables('networkApiVersion')]",
             "location": "[resourceGroup().location]",
+            "sku": {
+                "name": "[variables('pipSku')]"
+            },
             "properties": {
-                "publicIPAllocationMethod": "Dynamic",
+                "publicIPAllocationMethod": "[variables('pipAllocation')]",
                 "idleTimeoutInMinutes": 4
             },
             "zones": "[variables('zones')]",
