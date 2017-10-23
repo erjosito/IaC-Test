@@ -236,7 +236,7 @@
                 "networkProfile": {
                     "networkInterfaces": [
                         {
-                            "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(parameters('vmName'), '-', copyIndex(1), '-nic0'))]",
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(parameters('vmName'), '-', copyIndex(1), '-nic'))]",
                             "properties": {
                                 "primary": true
                             }
@@ -253,7 +253,7 @@
                 "[string(add(mod(copyIndex(1), variables('maxZonen')), 1))]"
             ],
             "dependsOn": [
-                "[concat(parameters('vmName'), '-nic0')]", "[variables('avSetName')]"
+                "[concat(parameters('vmName'), '-nic')]", "[variables('avSetName')]"
             ]
         },
         {
@@ -293,7 +293,7 @@
                 "networkProfile": {
                     "networkInterfaces": [
                         {
-                            "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(parameters('vmName'), '-', copyIndex(1), '-nic0'))]",
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(parameters('vmName'), '-', copyIndex(1), '-nic'))]",
                             "properties": {
                                 "primary": true
                             }
@@ -307,12 +307,12 @@
                 "count": "[parameters('vmCount')]"
             },
             "dependsOn": [
-                "[concat(parameters('vmName'), '-nic0')]", "[variables('avSetName')]"
+                "[concat(parameters('vmName'), '-nic')]", "[variables('avSetName')]"
             ]
         },
 		{
 			"comments": "Create eth0",
-            "name": "[concat(parameters('vmName'), '-', copyIndex(1), '-nic0')]",
+            "name": "[concat(parameters('vmName'), '-', copyIndex(1), '-nic')]",
 			"type": "Microsoft.Resources/deployments",
 			"apiVersion": "[variables('deploymentApiVersion')]",
 			"properties": {
@@ -338,7 +338,7 @@
                 "slb-int"
             ],
             "copy": {
-                "name": "[concat(parameters('vmName'), '-nic0')]",
+                "name": "[concat(parameters('vmName'), '-nic')]",
                 "count": "[parameters('vmCount')]"
             }
         },
