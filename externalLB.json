@@ -100,6 +100,9 @@
             "name": "[parameters('slbName')]",
             "apiVersion": "[variables('networkApiVersion')]",
             "location": "[resourceGroup().location]",
+            "sku": {
+                "name": "[parameters('lbSku')]"
+            },
             "properties": {
                 "frontendIPConfigurations": [
                     {
