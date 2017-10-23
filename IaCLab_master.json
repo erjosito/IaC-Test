@@ -39,6 +39,12 @@
             "allowedValues": [ "basic","standard" ],
             "metadata": { "description": "Whether Load Balancers should be Basic or Standard (preview)" }
         },
+        "lbType": {
+            "defaultValue": "external",
+            "type": "string",
+            "allowedValues": [ "internal", "external", "both" ],
+            "metadata": { "description": "Whether Load Balancers should be Basic or Standard (preview)" }
+        },
         "repoBranch": {
             "defaultValue": "master",
             "type": "string",
@@ -79,6 +85,7 @@
                 "pipYesNo": { "value": "[parameters('pipYesNo')]" },
                 "azYesNo": { "value": "[parameters('azYesNo')]" },
                 "lbSku": { "value": "[parameters('lbSku')]" },
+                "lbType": { "value": "[parameters('lbType')]" },
                 "scriptUri": { "value": "[variables('customScriptUri')]" },
                 "scriptCmd": { "value": "[variables('customScriptCmd')]" }
             },

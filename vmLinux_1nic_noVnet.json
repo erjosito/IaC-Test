@@ -74,6 +74,12 @@
             "allowedValues": [ "basic","standard" ],
             "metadata": { "description": "Whether Load Balancers should be Basic or Standard (preview)" }
         },
+        "lbType": {
+            "defaultValue": "external",
+            "type": "string",
+            "allowedValues": [ "internal", "external", "both" ],
+            "metadata": { "description": "Whether Load Balancers should be Basic or Standard (preview)" }
+        },
         "baseRepoURL": {
             "defaultValue": "https://raw.githubusercontent.com/erjosito/Iac-Test/master/",
             "type": "string",
@@ -158,11 +164,18 @@
         "vmName": {
             "no": "[parameters('vmName')]",
             "yes": "[concat(parameters('vmName'), '-az')]"
-        }
+        },
+        "backendConfigNameExtIntHash": {
+            "internal": "[concat(variables('slbBackendName'), '-int')]",
+            "external": "[concat(variables('slbBackendName'), '-ext')]",
+            "both": "[concat(variables('slbBackendName'), '-int')]"
+        },
+        "backendConfigNameExtInt": "[variables('backendConfigNameExtIntHash')[parameters('lbType')]]"
     },
     "resources": [
 		{
-			"comments": "Availability set for eventual HA",
+            "comments": "Availability set for eventual HA, only if no AZs are being used",
+            "condition": "[equals(parameters('azYesNo'), 'no')]",
 			"type": "Microsoft.Compute/availabilitySets",
 			"name": "[variables('avSetName')]",
 			"apiVersion": "[variables('computeApiVersion')]",
@@ -176,7 +189,8 @@
             }
         },
 		{
-			"comments": "Optionally, create an internal load balancer",
+            "comments": "Optionally, create an internal load balancer",
+            "condition": "[or(equals(parameters('lbType'), 'internal'), equals(parameters('lbType'), 'both'))]",
             "name": "slb-int",
 			"type": "Microsoft.Resources/deployments",
 			"apiVersion": "[variables('deploymentApiVersion')]",
@@ -191,6 +205,7 @@
 		},
 		{
 			"comments": "Optionally, create an external load balancer. Wait until the internal has been created, there seems to be some conflict when creating both at the same time",
+            "condition": "[or(equals(parameters('lbType'), 'external'), equals(parameters('lbType'), 'both'))]",
             "name": "slb-ext",
 			"type": "Microsoft.Resources/deployments",
 			"apiVersion": "[variables('deploymentApiVersion')]",
@@ -203,7 +218,6 @@
 				"parameters":  "[variables('lbTemplateParametersExt')]"
 			},
             "dependsOn": [
-                "slb-int"
             ]
 		},
         {
@@ -332,7 +346,7 @@
                     "subnetName": { "value": "[parameters('subnet0Name')]"},
                     "slbName": { "value": "[concat(variables('slbName'), '-int')]"},
                     "slbYesNo": { "value": "[parameters('deployLBYesNo')]"},
-                    "backendConfigName": { "value": "[concat(variables('slbBackendName'), '-int')]"},
+                    "backendConfigName": { "value": "[variables('backendConfigNameExtInt')]"},
                     "pipYesNo": { "value": "[parameters('pipYesNo')]"},
                     "lbSku": { "value": "[parameters('lbSku')]"},
                     "azYesNo": { "value": "[parameters('azYesNo')]"},
