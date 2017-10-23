@@ -93,6 +93,10 @@
         }
     },
     "variables": {
+        "deploymentApiVersion": "2017-08-01",
+        "networkApiVersion": "2017-09-01",
+        "computeApiVersion": "2017-03-30",
+        "maxZonen": 3,   
         "vnetID": "[resourceId('Microsoft.Network/virtualNetworks', parameters('vnetName'))]",
         "subnet0Id": "[concat(variables('vnetID'), '/subnets/', parameters('subnet0Name'))]",
         "settingsTable": {
@@ -196,7 +200,8 @@
             ]
 		},
         {
-            "comments": "Create Scale Set for NVAs",
+            "comments": "Create VM Scale Set, no AZs",
+            "condition": "[equals(parameters('azYesNo'), 'no')]",
             "type": "Microsoft.Compute/virtualMachineScaleSets",
             "name": "[parameters('vmSSName')]",
             "location": "[resourceGroup().location]",
@@ -280,6 +285,90 @@
             }
         },
         {
+            "comments": "Create VM Scale Set, with AZs",
+            "condition": "[equals(parameters('azYesNo'), 'yes')]",
+            "type": "Microsoft.Compute/virtualMachineScaleSets",
+            "name": "[concat(parameters('vmSSName'), '-az')]",
+            "location": "[resourceGroup().location]",
+            "apiVersion": "2016-04-30-preview",
+            "dependsOn": [
+                "slb-int",
+                "slb-ext"
+            ],
+            "sku": {
+                "name": "[variables('settings')['vmSize']]",
+                "capacity": "[parameters('vmCount')]"
+            },
+            "properties": {
+                "overprovision": true,
+                "upgradePolicy": {
+                    "mode": "Manual"
+                },
+                "virtualMachineProfile": {
+                    "storageProfile": {
+                        "osDisk": {
+                            "createOption": "FromImage"
+                        },
+                        "imageReference": {
+                            "publisher": "[variables('settings')['publisher']]",
+                            "offer": "[variables('settings')['product']]",
+                            "sku": "[variables('settings')['sku']]",
+                            "version": "latest"
+                        }
+                    },
+                    "osProfile": {
+                        "computerNamePrefix": "[parameters('vmName')]",
+                        "adminUsername": "[parameters('vmUsr')]",
+                        "adminPassword": "[parameters('vmPwd')]"
+                    },
+                    "networkProfile": {
+                        "networkInterfaceConfigurations": [
+                            {
+                                "name": "nic0",
+                                "properties": {
+                                    "primary": true,
+                                    "enableIPForwarding": true,
+                                    "ipConfigurations": [
+                                        {
+                                            "name": "ipconfig0",
+                                            "properties": {
+                                                "subnet": {
+                                                    "id": "[variables('subnet0Id')]"
+                                                },
+                                                "loadBalancerBackendAddressPools": [
+                                                    "[variables('loadBalancerBackendAddressPool')]"
+                                                ]
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        ]
+                    },
+                    "extensionProfile": {
+                        "extensions": [
+                            {
+                                "name": "VMSScustomScript",
+                                "properties": {
+                                    "publisher": "Microsoft.Azure.Extensions",
+                                    "settings": {
+                                        "fileUris": [
+                                            "[parameters('scriptUri')]"
+                                        ]
+                                    },
+                                    "protectedSettings": {
+                                        "commandToExecute": "[parameters('scriptCmd')]"
+                                    },
+                                    "typeHandlerVersion": "2.0",
+                                    "autoUpgradeMinorVersion": true,
+                                    "type": "CustomScript"
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        },        {
             "comments": "Create the autoscale settings for the VM scale set",
             "type": "Microsoft.Insights/autoscaleSettings",
             "apiVersion": "2015-04-01",

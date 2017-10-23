@@ -69,7 +69,12 @@
             "true": true,
             "false": false
         },
-        "dsrBool": "[variables('dsrBoolHash')[parameters('dsr')]]"
+        "dsrBool": "[variables('dsrBoolHash')[parameters('dsr')]]",
+        "pipSkuHash": {
+            "basic": "Basic",
+            "standard": "Standard"
+        },
+        "pipSku": "[variables('pipSkuHash')[parameters('lbSku')]]"
     },
     "resources": [
         {
@@ -79,7 +84,7 @@
             "apiVersion": "[variables('networkApiVersion')]",
             "location": "[resourceGroup().location]",
             "sku": {
-                "name": "[parameters('lbSku')]"
+                "name": "[variables('pipSku')]"
             },
             "properties": {
                 "publicIPAllocationMethod": "Dynamic",
