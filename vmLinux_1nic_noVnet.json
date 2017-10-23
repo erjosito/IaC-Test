@@ -322,7 +322,8 @@
 					"contentVersion": "1.0.0.0"
 				},
 				"parameters":  {
-                    "nicName": {"value": "[concat(parameters('vmName'), '-', copyIndex(1), '-nic0')]"},
+                    "nicName": {"value": "[concat(parameters('vmName'), '-', copyIndex(1), '-nic')]"},
+                    "ipConfigName": {"value": "[concat(parameters('vmName'), '-', copyIndex(1), '-ipConfig0')]"},
                     "vnetName": { "value": "[parameters('vnetName')]" },
                     "subnetName": { "value": "[parameters('subnet0Name')]"},
                     "slbName": { "value": "[concat(variables('slbName'), '-int')]"},
