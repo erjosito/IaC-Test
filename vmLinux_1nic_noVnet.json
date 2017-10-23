@@ -133,10 +133,10 @@
                 "backendConfigName": { "value": "[concat(variables('slbBackendName'), '-int')]" },
                 "ipPrefix": { "value": "[parameters('ipPrefix')]" },
                 "vipSuffix": { "value": "[parameters('vipSuffix')]" },
-                "probePort": { "value": 1138 },
-                "frontendPort": { "value": 22 },
-                "backendPort": { "value": 22 },
-                "ruleName": { "value": "ssh" }
+                "probePort": { "value": 80 },
+                "frontendPort": { "value": 80 },
+                "backendPort": { "value": 80 },
+                "ruleName": { "value": "web" }
             },
             "no": {
             }
@@ -152,10 +152,10 @@
                 "lbSku": { "value": "[parameters('lbSku')]" },
                 "backendConfigName": { "value": "[concat(variables('slbBackendName'), '-ext')]" },
                 "pipName": { "value": "[concat(variables('slbPipName'), '-ext')]" },
-                "probePort": { "value": 1139 },
-                "frontendPort": { "value": 1022 },
-                "backendPort": { "value": 22 },
-                "ruleName": { "value": "ssh" }
+                "probePort": { "value": 80 },
+                "frontendPort": { "value": 80 },
+                "backendPort": { "value": 80 },
+                "ruleName": { "value": "web" }
             },
             "no": {
             }
@@ -170,7 +170,13 @@
             "external": "[concat(variables('slbBackendName'), '-ext')]",
             "both": "[concat(variables('slbBackendName'), '-int')]"
         },
-        "backendConfigNameExtInt": "[variables('backendConfigNameExtIntHash')[parameters('lbType')]]"
+        "backendConfigNameExtInt": "[variables('backendConfigNameExtIntHash')[parameters('lbType')]]",
+        "lbNameExtIntHash": {
+            "internal": "[concat(variables('slbName'), '-int')]",
+            "external": "[concat(variables('slbName'), '-ext')]",
+            "both": "[concat(variables('slbName'), '-int')]"
+        },
+        "lbNameExtInt": "[variables('lbNameExtIntHash')[parameters('lbType')]]"
     },
     "resources": [
 		{
@@ -344,7 +350,7 @@
                     "ipConfigName": {"value": "[concat(parameters('vmName'), '-', copyIndex(1), '-ipConfig0')]"},
                     "vnetName": { "value": "[parameters('vnetName')]" },
                     "subnetName": { "value": "[parameters('subnet0Name')]"},
-                    "slbName": { "value": "[concat(variables('slbName'), '-int')]"},
+                    "slbName": { "value": "[variables('lbNameExtInt')]"},
                     "slbYesNo": { "value": "[parameters('deployLBYesNo')]"},
                     "backendConfigName": { "value": "[variables('backendConfigNameExtInt')]"},
                     "pipYesNo": { "value": "[parameters('pipYesNo')]"},

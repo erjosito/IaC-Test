@@ -2,10 +2,6 @@
     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
-        "apiVersion": {
-            "defaultValue": "2015-06-15",
-            "type": "string"
-        },
         "vnetName": {
             "defaultValue": "myVnet",
             "type": "string"
@@ -23,7 +19,7 @@
             "defaultValue": "[concat('nva',uniqueString(resourceGroup().id))]",
             "type": "string"
         },
-        "vmSSName": {
+        "vmssName": {
             "defaultValue": "[concat('nvaVMSS',uniqueString(resourceGroup().id))]",
             "type": "string"
         },
@@ -38,10 +34,6 @@
         "vmPwd": {
             "defaultValue": null,
             "type": "securestring"
-        },
-        "pipName": {
-            "defaultValue": "nva-publicIP",
-            "type": "string"
         },
         "subnet0Name": {
             "defaultValue": "subnet1",
@@ -62,6 +54,18 @@
 			"type": "string",
             "allowedValues": [ "yes","no" ]
 		},
+        "lbSku": {
+            "defaultValue": "basic",
+            "type": "string",
+            "allowedValues": [ "basic","standard" ],
+            "metadata": { "description": "Whether Load Balancers should be Basic or Standard (preview)" }
+        },
+        "lbType": {
+            "defaultValue": "external",
+            "type": "string",
+            "allowedValues": [ "external", "internal", "both" ],
+            "metadata": { "description": "Whether Load Balancers should be internal or external" }
+        },
 		"ipPrefix": {
 			"defaultValue": "10.0.0",
 			"type": "string"
@@ -80,12 +84,6 @@
 			"type": "string",
             "allowedValues": [ "yes","no" ]
 		},
-        "lbSku": {
-            "defaultValue": "basic",
-            "type": "string",
-            "allowedValues": [ "basic","standard" ],
-            "metadata": { "description": "Whether Load Balancers should be Basic or Standard (preview)" }
-        },
         "baseRepoURL": {
             "defaultValue": "https://raw.githubusercontent.com/erjosito/Iac-Test/master/",
             "type": "string",
@@ -111,8 +109,8 @@
         "slbName": "[concat(parameters('vmName'), '-slb')]",
         "slbBackendName": "[concat(parameters('vmName'), '-slbBackend')]",
         "slbPipName": "[concat(parameters('vmName'), '-slbPip')]",
-        "ipPrefix": "10.4.2",
-        "vipSuffix": "100",
+        "ipPrefix": "[parameters('ipPrefix')]",
+        "vipSuffix": "[parameters('vipSuffix')]",
         "slbSubnet": "[parameters('subnet0Name')]",
 		"deployLBTemplate": {
 			"yes": "[concat(parameters('baseRepoURL'), 'slb.json')]",
@@ -130,10 +128,10 @@
                 "backendConfigName": { "value": "[concat(variables('slbBackendName'), '-int')]" },
                 "ipPrefix": { "value": "[parameters('ipPrefix')]" },
                 "vipSuffix": { "value": "[parameters('vipSuffix')]" },
-                "probePort": { "value": 1138 },
-                "frontendPort": { "value": 22 },
-                "backendPort": { "value": 22 },
-                "ruleName": { "value": "ssh" }
+                "probePort": { "value": 80 },
+                "frontendPort": { "value": 80 },
+                "backendPort": { "value": 80 },
+                "ruleName": { "value": "web" }
             },
             "no": {
             }
@@ -149,10 +147,10 @@
                 "lbSku": { "value": "[parameters('lbSku')]" },
                 "backendConfigName": { "value": "[concat(variables('slbBackendName'), '-ext')]" },
                 "pipName": { "value": "[concat(variables('slbPipName'), '-ext')]" },
-                "probePort": { "value": 1139 },
-                "frontendPort": { "value": 1022 },
-                "backendPort": { "value": 22 },
-                "ruleName": { "value": "ssh" }
+                "probePort": { "value": 22 },
+                "frontendPort": { "value": 80 },
+                "backendPort": { "value": 80 },
+                "ruleName": { "value": "web" }
             },
             "no": {
             }
@@ -165,14 +163,24 @@
             "no": {
             }
         },
-        "loadBalancerBackendAddressPool": "[variables('loadBalancerBackendAddressPoolHash')[parameters('deployLBYesNo')]]"    
+        "loadBalancerBackendAddressPool": "[variables('loadBalancerBackendAddressPoolHash')[parameters('deployLBYesNo')]]",
+        "vmssDependsOnHash": {
+            "internal": "slb-int",
+            "external": "slb-ext"
+        },
+        "vmssDependsOn": "[variables('vmssDependsOnHash')[parameters('lbType')]]",
+        "vmssNameHash": {
+            "yes": "[concat(parameters('vmssName'), '-az')]",
+            "no": "[parameters('vmssName')]"
+        }
     },
     "resources": [
 		{
 			"comments": "Optionally, create an internal load balancer",
+            "condition": "[or(equals(parameters('lbType'), 'internal'), equals(parameters('lbType'), 'both'))]",
             "name": "slb-int",
 			"type": "Microsoft.Resources/deployments",
-			"apiVersion": "2016-06-01",
+			"apiVersion": "[variables('networkApiVersion')]",
 			"properties": {
 				"mode": "Incremental",
 				"templateLink": {
@@ -184,9 +192,10 @@
 		},
 		{
 			"comments": "Optionally, create an external load balancer",
+            "condition": "[or(equals(parameters('lbType'), 'external'), equals(parameters('lbType'), 'both'))]",
             "name": "slb-ext",
 			"type": "Microsoft.Resources/deployments",
-			"apiVersion": "2016-06-01",
+			"apiVersion": "[variables('networkApiVersion')]",
 			"properties": {
 				"mode": "Incremental",
 				"templateLink": {
@@ -196,19 +205,17 @@
 				"parameters":  "[variables('deployLBextParameters')]"
 			},
             "dependsOn": [
-                "slb-int"
             ]
 		},
         {
             "comments": "Create VM Scale Set, no AZs",
             "condition": "[equals(parameters('azYesNo'), 'no')]",
             "type": "Microsoft.Compute/virtualMachineScaleSets",
-            "name": "[parameters('vmSSName')]",
+            "name": "[variables('vmssNameHash')['no']]",
             "location": "[resourceGroup().location]",
-            "apiVersion": "2016-04-30-preview",
+            "apiVersion": "[variables('computeApiVersion')]",
             "dependsOn": [
-                "slb-int",
-                "slb-ext"
+                "[variables('vmssDependsOn')]"
             ],
             "sku": {
                 "name": "[variables('settings')['vmSize']]",
@@ -288,9 +295,9 @@
             "comments": "Create VM Scale Set, with AZs",
             "condition": "[equals(parameters('azYesNo'), 'yes')]",
             "type": "Microsoft.Compute/virtualMachineScaleSets",
-            "name": "[concat(parameters('vmSSName'), '-az')]",
+            "name": "[variables('vmssNameHash')['yes']]",
             "location": "[resourceGroup().location]",
-            "apiVersion": "2016-04-30-preview",
+            "apiVersion": "[variables('computeApiVersion')]",
             "dependsOn": [
                 "slb-int",
                 "slb-ext"
@@ -368,18 +375,19 @@
                     }
                 }
             }
-        },        {
+        },
+        {
             "comments": "Create the autoscale settings for the VM scale set",
             "type": "Microsoft.Insights/autoscaleSettings",
-            "apiVersion": "2015-04-01",
+            "apiVersion": "[variables('computeApiVersion')]",
             "name": "[parameters('scaleSettingsName')]",
             "location": "[resourceGroup().location]",
             "dependsOn": [
-                "[concat('Microsoft.Compute/virtualMachineScaleSets/', parameters('vmSSName'))]"
+                "[concat('Microsoft.Compute/virtualMachineScaleSets/', variables('vmssNameHash')[parameters('AzYesNo')])]"
             ],
             "properties": {
                 "name": "[parameters('scaleSettingsName')]",
-                "targetResourceUri": "[concat('/subscriptions/',subscription().subscriptionId, '/resourceGroups/',  resourceGroup().name, '/providers/Microsoft.Compute/virtualMachineScaleSets/', parameters('vmSSName'))]",
+                "targetResourceUri": "[concat('/subscriptions/',subscription().subscriptionId, '/resourceGroups/',  resourceGroup().name, '/providers/Microsoft.Compute/virtualMachineScaleSets/', variables('vmssNameHash')[parameters('AzYesNo')])]",
                 "enabled": true,
                 "profiles": [
                     {

@@ -6,6 +6,7 @@
             "adminPassword": { "value": "Microsoft123!" },
             "deployLBYesNo": { "value": "yes" },
             "lbSku": { "value": "standard" },
+            "lbType": { "value": "external" }, 
             "pipYesNo": { "value": "yes" },
             "azYesNo": { "value": "yes" }
         }

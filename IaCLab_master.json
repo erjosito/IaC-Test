@@ -12,6 +12,11 @@
             "type": "securestring",
             "metadata": { "description": "Default password for VMs and NVAs" }
 		},
+        "vmName": {
+            "defaultValue": "myvm",
+            "type": "string",
+            "metadata": { "description": "Name for the VMs or the VMSS" }
+        },
         "vmType": {
             "defaultValue": "ubuntu",
             "type": "string",
@@ -73,7 +78,7 @@
                 "baseRepoURL": { "value": "[variables('baseRepoURL')]" },
                 "vmType": { "value": "[parameters('vmType')]" },
                 "vmCount": { "value": 2 },
-                "vmName": { "value": "myvm" },
+                "vmName": { "value": "[parameters('vmName')]" },
                 "vnetName": { "value": "[variables('vnetName')]" },
                 "storageAccountName": { "value": "[variables('storageAccountName')]" },
                 "subnet0Name": { "value": "[variables('subnetName')]" },
@@ -90,7 +95,25 @@
                 "scriptCmd": { "value": "[variables('customScriptCmd')]" }
             },
             "ubuntuScaleSet": {
-
+                "baseRepoURL": { "value": "[variables('baseRepoURL')]" },
+                "vmType": { "value": "[parameters('vmType')]" },
+                "vmCount": { "value": 2 },
+                "vmName": { "value": "[parameters('vmName')]" },
+                "vmssName": { "value": "[parameters('vmName')]" },
+                "vnetName": { "value": "[variables('vnetName')]" },
+                "storageAccountName": { "value": "[variables('storageAccountName')]" },
+                "subnet0Name": { "value": "[variables('subnetName')]" },
+                "vmUsr": { "value": "[parameters('adminUsername')]" },
+                "vmPwd": { "value": "[parameters('adminPassword')]" },
+                "deployLBYesNo": { "value": "[parameters('deployLBYesNo')]" },
+                "lbSku": { "value": "[parameters('lbSku')]" },
+                "lbType": { "value": "[parameters('lbType')]" },
+                "ipPrefix": { "value": "[variables('ipPrefix')]" },
+                "vipSuffix": { "value": "[variables('vipSuffix')]" },
+                "pipYesNo": { "value": "[parameters('pipYesNo')]" },
+                "azYesNo": { "value": "[parameters('azYesNo')]" },
+                "scriptUri": { "value": "[variables('customScriptUri')]" },
+                "scriptCmd": { "value": "[variables('customScriptCmd')]" }
             }
         },
         "vmParams": "[variables('vmParamsHash')[parameters('vmType')]]",
