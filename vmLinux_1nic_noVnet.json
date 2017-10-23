@@ -250,7 +250,7 @@
             },
             "resources": [],
             "copy": {
-                "name": "[variables('vmName')['no']]",
+                "name": "[variables('vmName')['yes']]",
                 "count": "[parameters('vmCount')]"
             },
             "zones": [
