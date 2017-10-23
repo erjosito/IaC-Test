@@ -154,7 +154,11 @@
             "no": {
             }
         },
-        "lbTemplateParametersExt": "[variables('lbTemplateParametersExtHash')[parameters('deployLBYesNo')]]"
+        "lbTemplateParametersExt": "[variables('lbTemplateParametersExtHash')[parameters('deployLBYesNo')]]",
+        "vmName": {
+            "no": "[parameters('vmName')]",
+            "yes": "[concat(parameters('vmName'), '-az')]"
+        }
     },
     "resources": [
 		{
@@ -206,7 +210,7 @@
             "comments": "Deploy Linux VM with AZs",
             "condition": "[equals(parameters('azYesNo'), 'yes')]",
             "type": "Microsoft.Compute/virtualMachines",
-            "name": "[concat(parameters('vmName'), '-az-', copyIndex(1))]",
+            "name": "[concat(variables('vmName')['yes'], '-', copyIndex(1))]",
 			"apiVersion": "[variables('computeApiVersion')]",
             "location": "[resourceGroup().location]",
             "properties": {
@@ -246,7 +250,7 @@
             },
             "resources": [],
             "copy": {
-                "name": "[parameters('vmName')]",
+                "name": "[variables('vmName')['no']]",
                 "count": "[parameters('vmCount')]"
             },
             "zones": [
@@ -260,7 +264,7 @@
             "comments": "Deploy Linux VM without AZs",
             "condition": "[equals(parameters('azYesNo'), 'no')]",
             "type": "Microsoft.Compute/virtualMachines",
-            "name": "[concat(parameters('vmName'), '-', copyIndex(1))]",
+            "name": "[concat(variables('vmName')['no'], '-', copyIndex(1))]",
 			"apiVersion": "[variables('computeApiVersion')]",
             "location": "[resourceGroup().location]",
             "properties": {
@@ -303,7 +307,7 @@
             },
             "resources": [],
             "copy": {
-                "name": "[parameters('vmName')]",
+                "name": "[variables('vmName')['no']]",
                 "count": "[parameters('vmCount')]"
             },
             "dependsOn": [
@@ -361,7 +365,7 @@
                 }
             },
             "dependsOn": [
-                "[parameters('vmName')]"
+                "[variables('vmName')[parameters('azYesNo')]]"
             ],
             "copy": {
                 "name": "[concat(parameters('vmName'), '-script')]",
