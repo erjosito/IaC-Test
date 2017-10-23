@@ -176,7 +176,13 @@
             "external": "[concat(variables('slbName'), '-ext')]",
             "both": "[concat(variables('slbName'), '-int')]"
         },
-        "lbNameExtInt": "[variables('lbNameExtIntHash')[parameters('lbType')]]"
+        "lbNameExtInt": "[variables('lbNameExtIntHash')[parameters('lbType')]]",
+        "nicDependsOnHash": {
+            "internal": "slb-int",
+            "external": "slb-ext",
+            "both": "slb-int"
+        },
+        "nicDependsOn": "[variables('nicDependsOnHash')[parameters('lbType')]]"
     },
     "resources": [
 		{
@@ -360,7 +366,7 @@
                 }
             },
             "dependsOn": [
-                "slb-int"
+                "[variables('nicDependsOn')]"
             ],
             "copy": {
                 "name": "[concat(parameters('vmName'), '-nic')]",
