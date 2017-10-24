@@ -19,6 +19,11 @@
             "defaultValue": "[concat('nva',uniqueString(resourceGroup().id))]",
             "type": "string"
         },
+        "vmSize": {
+            "defaultValue": "Standard_D2_v2",
+            "type": "string",
+            "allowedValues": ["Standard_D2_v2", "Standard_D1_v2"]
+        },
         "vmssName": {
             "defaultValue": "[concat('nvaVMSS',uniqueString(resourceGroup().id))]",
             "type": "string"
@@ -133,7 +138,7 @@
                 "product": "UbuntuServer",
                 "publisher": "Canonical",
                 "sku": "16.04.0-LTS",
-                "vmSize": "Standard_D2_v2"
+                "vmSize": "[parameters('vmSize')]"
             }
         },
         "settings": "[variables('settingsTable')[parameters('vmType')]]",

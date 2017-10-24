@@ -5,6 +5,7 @@
             "adminUsername": { "value": "lab-user" },
             "adminPassword": { "value": "Microsoft123!" },
             "vmType": { "value": "ubuntuScaleSet" },
+            "vmSize": { "value": "Standard_D1_v2" },
             "deployLBYesNo": { "value": "yes" },
             "lbSku": { "value": "standard" },
             "lbType": { "value": "external" }, 

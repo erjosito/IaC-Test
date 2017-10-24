@@ -15,6 +15,12 @@
             "type": "string",
             "allowedValues": ["ubuntu"]
         },
+        "vmSize": {
+            "defaultValue": "Standard_D2_v2",
+            "type": "string",
+            "allowedValues": ["Standard_D2_v2", "Standard_D1_v2"],
+            "metadata": { "description": "Choose your desired VM size" }
+        },
         "vmCount": {
             "defaultValue": 1,
             "type": "int"
@@ -107,7 +113,7 @@
                 "product": "UbuntuServer",
                 "publisher": "Canonical",
                 "sku": "16.04.0-LTS",
-                "vmSize": "Standard_D2_v2"
+                "vmSize": "[parameters('vmSize')]"
             }
         },
         "nicUri": "[concat(parameters('baseRepoURL'),'vmNic.json')]",
