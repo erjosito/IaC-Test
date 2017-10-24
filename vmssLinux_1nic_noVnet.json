@@ -83,7 +83,12 @@
 			"defaultValue": "yes",
 			"type": "string",
             "allowedValues": [ "yes","no" ]
-		},
+        },
+        "azCount": {
+            "defaultValue": 2,
+            "type": "int",
+            "metadata": { "description": "Number of VMSS that will be created (1 per zone)" }
+        },
         "baseRepoURL": {
             "defaultValue": "https://raw.githubusercontent.com/erjosito/Iac-Test/master/",
             "type": "string",
@@ -295,11 +300,18 @@
             "comments": "Create VM Scale Set, with AZs",
             "condition": "[equals(parameters('azYesNo'), 'yes')]",
             "type": "Microsoft.Compute/virtualMachineScaleSets",
-            "name": "[variables('vmssNameHash')['yes']]",
+            "name": "[concat(variables('vmssNameHash')['no'], '-az', copyIndex(1))]",
             "location": "[resourceGroup().location]",
             "apiVersion": "[variables('computeApiVersion')]",
             "dependsOn": [
                 "[variables('vmssDependsOn')]"
+            ],
+            "copy": {
+                "name": "[variables('vmssNameHash')['yes']]",
+                "count": "[parameters('azCount')]"
+            },
+            "zones": [
+                "[string(add(mod(copyIndex(0), variables('maxZonen')), 1))]"
             ],
             "sku": {
                 "name": "[variables('settings')['vmSize']]",
@@ -376,13 +388,84 @@
             }
         },
         {
-            "comments": "Create the autoscale settings for the VM scale set",
+            "comments": "Create the autoscale settings for the VM scale set with no zones",
+            "condition": "[equals(parameters('azYesNo'), 'no')]",
             "type": "Microsoft.Insights/autoscaleSettings",
             "apiVersion": "[variables('computeApiVersion')]",
             "name": "[parameters('scaleSettingsName')]",
             "location": "[resourceGroup().location]",
             "dependsOn": [
-                "[concat('Microsoft.Compute/virtualMachineScaleSets/', variables('vmssNameHash')[parameters('AzYesNo')])]"
+                "[concat('Microsoft.Compute/virtualMachineScaleSets/', variables('vmssNameHash')[parameters('azYesNo')])]"
+            ],
+            "properties": {
+                "name": "[parameters('scaleSettingsName')]",
+                "targetResourceUri": "[concat('/subscriptions/',subscription().subscriptionId, '/resourceGroups/',  resourceGroup().name, '/providers/Microsoft.Compute/virtualMachineScaleSets/', variables('vmssNameHash')[parameters('AzYesNo')])]",
+                "enabled": true,
+                "profiles": [
+                    {
+                        "name": "Profile1",
+                        "capacity": {
+                            "minimum": "2",
+                            "maximum": "10",
+                            "default": "2"
+                        },
+                        "rules": [
+                            {
+                                "metricTrigger": {
+                                    "metricName": "Percentage CPU",
+                                    "metricNamespace": "",
+                                    "metricResourceUri": "[concat('/subscriptions/',subscription().subscriptionId, '/resourceGroups/',  resourceGroup().name, '/providers/Microsoft.Compute/virtualMachineScaleSets/', parameters('vmSSName'))]",
+                                    "timeGrain": "PT1M",
+                                    "statistic": "Average",
+                                    "timeWindow": "PT5M",
+                                    "timeAggregation": "Average",
+                                    "operator": "GreaterThan",
+                                    "threshold": 60.0
+                                },
+                                "scaleAction": {
+                                    "direction": "Increase",
+                                    "type": "ChangeCount",
+                                    "value": "1",
+                                    "cooldown": "PT1M"
+                                }
+                            },
+                            {
+                                "metricTrigger": {
+                                    "metricName": "Percentage CPU",
+                                    "metricNamespace": "",
+                                    "metricResourceUri": "[concat('/subscriptions/',subscription().subscriptionId, '/resourceGroups/',  resourceGroup().name, '/providers/Microsoft.Compute/virtualMachineScaleSets/', parameters('vmSSName'))]",
+                                    "timeGrain": "PT1M",
+                                    "statistic": "Average",
+                                    "timeWindow": "PT5M",
+                                    "timeAggregation": "Average",
+                                    "operator": "LessThan",
+                                    "threshold": 30.0
+                                },
+                                "scaleAction": {
+                                    "direction": "Decrease",
+                                    "type": "ChangeCount",
+                                    "value": "1",
+                                    "cooldown": "PT5M"
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "comments": "Create the autoscale settings for the VM scale set with availability zones",
+            "condition": "[equals(parameters('azYesNo'), 'yes')]",
+            "type": "Microsoft.Insights/autoscaleSettings",
+            "apiVersion": "[variables('computeApiVersion')]",
+            "name": "[concat(parameters('scaleSettingsName'), '-az', copyIndex(1))]",
+            "location": "[resourceGroup().location]",
+            "copy": {
+                "name": "[concat(parameters('scaleSettingsName'), '-az')]",
+                "count": "[parameters('azCount')]"
+            },
+            "dependsOn": [
+                "[concat('Microsoft.Compute/virtualMachineScaleSets/', variables('vmssNameHash')[parameters('azYesNo')])]"
             ],
             "properties": {
                 "name": "[parameters('scaleSettingsName')]",

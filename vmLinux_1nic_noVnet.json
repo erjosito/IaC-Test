@@ -280,7 +280,7 @@
                 "count": "[parameters('vmCount')]"
             },
             "zones": [
-                "[string(add(mod(copyIndex(1), variables('maxZonen')), 1))]"
+                "[string(add(mod(copyIndex(0), variables('maxZonen')), 1))]"
             ],
             "dependsOn": [
                 "[concat(parameters('vmName'), '-nic')]", "[variables('avSetName')]"
