@@ -160,6 +160,7 @@
             "no": {
             }
         },
+        "deployLBextParameters": "[variables('deployLBextParametersHash')[parameters('deployLBYesNo')]]",
         "vmssDependsOnHash": {
             "internal": "[concat(variables('slbName'), '-int')]",
             "external": "[concat(variables('slbName'), '-ext')]"
@@ -175,10 +176,8 @@
             "external": "[concat(variables('slbBackendName'), '-ext')]"
         },
         "slbBackendNameExtInt": "[variables('slbBackendNameExtIntHash')[parameters('lbType')]]",
-        "deployLBextParameters": "[variables('deployLBextParametersHash')[parameters('deployLBYesNo')]]",
         "loadBalancerBackendAddressPoolHash": {
             "yes": {
-        "slbBackendNameExtInt": "[variables('slbBackendNameExtIntHash')[parameters('lbType')]]",
                 "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('vmssDependsOn'), '/backendAddressPools/', variables('slbBackendNameExtInt')))]"                
             },
             "no": {
