@@ -124,6 +124,7 @@
         "deploymentApiVersion": "2017-08-01",
         "networkApiVersion": "2017-08-01",
         "computeApiVersion": "2017-03-30",
+        "scaleSettingsApiVersion": "2015-04-01",
         "maxZonen": 3,   
         "vnetID": "[resourceId('Microsoft.Network/virtualNetworks', parameters('vnetName'))]",
         "subnet0Id": "[concat(variables('vnetID'), '/subnets/', parameters('subnet0Name'))]",
@@ -420,7 +421,7 @@
             "comments": "Create the autoscale settings for the VM scale set with no zones",
             "condition": "[equals(parameters('azYesNo'), 'no')]",
             "type": "Microsoft.Insights/autoscaleSettings",
-            "apiVersion": "[variables('computeApiVersion')]",
+            "apiVersion": "[variables('scaleSettingsApiVersion')]",
             "name": "[parameters('scaleSettingsName')]",
             "location": "[resourceGroup().location]",
             "dependsOn": [
@@ -486,7 +487,7 @@
             "comments": "Create the autoscale settings for the VM scale set with availability zones",
             "condition": "[equals(parameters('azYesNo'), 'yes')]",
             "type": "Microsoft.Insights/autoscaleSettings",
-            "apiVersion": "[variables('computeApiVersion')]",
+            "apiVersion": "[variables('scaleSettingsApiVersion')]",
             "name": "[concat(parameters('scaleSettingsName'), '-az', copyIndex(1))]",
             "location": "[resourceGroup().location]",
             "copy": {
