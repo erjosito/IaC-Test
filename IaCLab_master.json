@@ -116,8 +116,8 @@
                 "capacityMax": { "value": 4 },
                 "capacityMin": { "value": 1 },
                 "capacityDef": { "value": 1 },
-                "cpuMax": { "value": 60.0 },
-                "cpuMin": { "value": 30.0 }
+                "cpuMax": { "value": 60 },
+                "cpuMin": { "value": 30 }
             }
         },
         "vmParams": "[variables('vmParamsHash')[parameters('vmType')]]",
