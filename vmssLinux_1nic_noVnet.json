@@ -170,8 +170,8 @@
         },
         "loadBalancerBackendAddressPool": "[variables('loadBalancerBackendAddressPoolHash')[parameters('deployLBYesNo')]]",
         "vmssDependsOnHash": {
-            "internal": "slb-int",
-            "external": "slb-ext"
+            "internal": "[concat(variables('slbName'), '-int')]",
+            "external": "[concat(variables('slbName'), '-ext')]"
         },
         "vmssDependsOn": "[variables('vmssDependsOnHash')[parameters('lbType')]]",
         "vmssNameHash": {
@@ -183,7 +183,7 @@
 		{
 			"comments": "Optionally, create an internal load balancer",
             "condition": "[or(equals(parameters('lbType'), 'internal'), equals(parameters('lbType'), 'both'))]",
-            "name": "slb-int",
+            "name": "[concat(variables('slbName'), '-int')]",
 			"type": "Microsoft.Resources/deployments",
 			"apiVersion": "[variables('networkApiVersion')]",
 			"properties": {
@@ -198,7 +198,7 @@
 		{
 			"comments": "Optionally, create an external load balancer",
             "condition": "[or(equals(parameters('lbType'), 'external'), equals(parameters('lbType'), 'both'))]",
-            "name": "slb-ext",
+            "name": "[concat(variables('slbName'), '-ext')]",
 			"type": "Microsoft.Resources/deployments",
 			"apiVersion": "[variables('networkApiVersion')]",
 			"properties": {
