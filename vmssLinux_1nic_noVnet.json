@@ -98,7 +98,7 @@
     "variables": {
         "deploymentApiVersion": "2017-08-01",
         "networkApiVersion": "2017-08-01",
-        "computeApiVersion": "2017-03-30",
+        "computeApiVersion": "2017-12-01",
         "maxZonen": 3,   
         "vnetID": "[resourceId('Microsoft.Network/virtualNetworks', parameters('vnetName'))]",
         "subnet0Id": "[concat(variables('vnetID'), '/subnets/', parameters('subnet0Name'))]",
