@@ -101,7 +101,6 @@
                 "vmName": { "value": "[parameters('vmName')]" },
                 "vmssName": { "value": "[parameters('vmName')]" },
                 "vnetName": { "value": "[variables('vnetName')]" },
-                "storageAccountName": { "value": "[variables('storageAccountName')]" },
                 "subnet0Name": { "value": "[variables('subnetName')]" },
                 "vmUsr": { "value": "[parameters('adminUsername')]" },
                 "vmPwd": { "value": "[parameters('adminPassword')]" },
