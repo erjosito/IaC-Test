@@ -4,10 +4,11 @@
     "parameters": {
             "adminUsername": { "value": "lab-user" },
             "adminPassword": { "value": "Microsoft123!" },
+            "vmType": { "value": "ubuntuScaleSet" },
             "deployLBYesNo": { "value": "yes" },
             "lbSku": { "value": "standard" },
             "lbType": { "value": "external" }, 
-            "pipYesNo": { "value": "yes" },
+            "pipYesNo": { "value": "no" },
             "azYesNo": { "value": "yes" }
         }
 }
