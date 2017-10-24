@@ -16,7 +16,7 @@
             "allowedValues": ["ubuntu"]
         },
         "vmSize": {
-            "defaultValue": "Standard_D2_v2",
+            "defaultValue": "Standard_D1_v2",
             "type": "string",
             "allowedValues": ["Standard_D2_v2", "Standard_D1_v2"],
             "metadata": { "description": "Choose your desired VM size" }
@@ -93,7 +93,7 @@
         }
     },
     "variables": {
-        "deploymentApiVersion": "2015-01-01",
+        "deploymentApiVersion": "2017-08-01",
         "computeApiVersion": "2017-03-30",
         "maxZonen": 3,   
 		"diskType": "Standard_LRS",
