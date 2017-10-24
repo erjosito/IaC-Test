@@ -53,7 +53,7 @@
         }
     },
     "variables": {
-        "networkApiVersion": "2017-09-01",        
+        "networkApiVersion": "2017-09-01",
         "nsgName": "[concat(parameters('nicName'), '-nsg')]",
         "pipName": "[concat(parameters('nicName'), '-pip')]",
         "nicIpConfigHash": {
@@ -121,8 +121,8 @@
         },
         "zones": "[variables('zonesHash')[parameters('azYesNo')]]",
         "nicDependsOnHash": {
-            "yes": "[variables('pipName')]",
-            "no": ""
+            "yes": [ "[variables('nsgName')]", "[variables('pipName')]" ],
+            "no": "[variables('nsgName')]"
         },
         "nicDependsOn": "[variables('nicDependsOnHash')[parameters('pipYesNo')]]",
         "pipSku": "[parameters('lbSku')]",
@@ -135,7 +135,7 @@
     "resources": [
         {
             "comments": "Public IP address with or without AZs",
-            "condition": "[equals(parameters('pipYesNo'), 'yes')]",            
+            "condition": "[equals(parameters('pipYesNo'), 'yes')]",
             "type": "Microsoft.Network/publicIPAddresses",
             "name": "[variables('pipName')]",
             "apiVersion": "[variables('networkApiVersion')]",
@@ -191,7 +191,7 @@
             "dependsOn": []
         },
         {
-			"comments": "NIC created",
+			"comments": "Create NIC",
             "type": "Microsoft.Network/networkInterfaces",
             "name": "[parameters('nicName')]",
             "apiVersion": "[variables('networkApiVersion')]",
@@ -210,7 +210,6 @@
             },
             "resources": [],
             "dependsOn": [
-                "[variables('nsgName')]",
                 "[variables('nicDependsOn')]"
             ]
         }

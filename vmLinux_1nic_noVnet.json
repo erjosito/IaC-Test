@@ -347,7 +347,7 @@
 		{
             "comments": "Nested template to create NIC, including PIP and NSG",
             "name": "[concat(parameters('vmName'), '-', copyIndex(1), '-nic')]",
-            "type": "Microsoft.Resources/deployments",
+            "type": "Microsoft.Resources/Deployments",
             "apiVersion": "[variables('deploymentApiVersion')]",
             "properties": {
                 "mode": "Incremental",
@@ -356,17 +356,17 @@
                     "contentVersion": "1.0.0.0"
                 },
                 "parameters":  {
-                    "nicName": {"value": "[concat(parameters('vmName'), '-', copyIndex(1), '-nic')]"},
-                    "ipConfigName": {"value": "[concat(parameters('vmName'), '-', copyIndex(1), '-ipConfig0')]"},
+                    "nicName": { "value": "[concat(parameters('vmName'), '-', copyIndex(1), '-nic')]" },
+                    "ipConfigName": { "value": "[concat(parameters('vmName'), '-', copyIndex(1), '-ipConfig0')]" },
                     "vnetName": { "value": "[parameters('vnetName')]" },
-                    "subnetName": { "value": "[parameters('subnet0Name')]"},
-                    "pipYesNo": { "value": "[parameters('pipYesNo')]"},
-                    "slbYesNo": { "value": "[parameters('deployLBYesNo')]"},
-                    "lbSku": { "value": "[parameters('lbSku')]"},
-                    "slbName": { "value": "[variables('lbNameExtInt')]"},
-                    "backendConfigName": { "value": "[variables('backendConfigNameExtInt')]"},
-                    "azYesNo": { "value": "[parameters('azYesNo')]"},
-                    "az": { "value": "[string(add(mod(copyIndex(0), variables('maxZonen')), 1))]"}
+                    "subnetName": { "value": "[parameters('subnet0Name')]" },
+                    "pipYesNo": { "value": "[parameters('pipYesNo')]" },
+                    "slbYesNo": { "value": "[parameters('deployLBYesNo')]" },
+                    "lbSku": { "value": "[parameters('lbSku')]" },
+                    "slbName": { "value": "[variables('lbNameExtInt')]" },
+                    "backendConfigName": { "value": "[variables('backendConfigNameExtInt')]" },
+                    "azYesNo": { "value": "[parameters('azYesNo')]" },
+                    "az": { "value": "[string(add(mod(copyIndex(0), variables('maxZonen')), 1))]" }
                 }
             },
             "copy": {
