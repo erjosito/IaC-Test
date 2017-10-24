@@ -160,15 +160,6 @@
             "no": {
             }
         },
-        "deployLBextParameters": "[variables('deployLBextParametersHash')[parameters('deployLBYesNo')]]",
-        "loadBalancerBackendAddressPoolHash": {
-            "yes": {
-                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', concat(variables('slbName'), '-int')), '/backendAddressPools/', concat(variables('slbBackendName'), '-int'))]"                
-            },
-            "no": {
-            }
-        },
-        "loadBalancerBackendAddressPool": "[variables('loadBalancerBackendAddressPoolHash')[parameters('deployLBYesNo')]]",
         "vmssDependsOnHash": {
             "internal": "[concat(variables('slbName'), '-int')]",
             "external": "[concat(variables('slbName'), '-ext')]"
@@ -177,7 +168,23 @@
         "vmssNameHash": {
             "yes": "[concat(parameters('vmssName'), '-az')]",
             "no": "[parameters('vmssName')]"
-        }
+        },
+        "slbBackendNameExtIntHash": {
+            "both": "[concat(variables('slbBackendName'), '-int')]",
+            "internal": "[concat(variables('slbBackendName'), '-int')]",
+            "external": "[concat(variables('slbBackendName'), '-ext')]"
+        },
+        "slbBackendNameExtInt": "[variables('slbBackendNameExtIntHash')[parameters('lbType')]]",
+        "deployLBextParameters": "[variables('deployLBextParametersHash')[parameters('deployLBYesNo')]]",
+        "loadBalancerBackendAddressPoolHash": {
+            "yes": {
+        "slbBackendNameExtInt": "[variables('slbBackendNameExtIntHash')[parameters('lbType')]]",
+                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('vmssDependsOn'), '/backendAddressPools/', variables('slbBackendNameExtInt')))]"                
+            },
+            "no": {
+            }
+        },
+        "loadBalancerBackendAddressPool": "[variables('loadBalancerBackendAddressPoolHash')[parameters('deployLBYesNo')]]"
     },
     "resources": [
 		{
