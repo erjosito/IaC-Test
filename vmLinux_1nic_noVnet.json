@@ -87,7 +87,7 @@
             "metadata": { "description": "Whether Load Balancers should be Basic or Standard (preview)" }
         },
         "baseRepoURL": {
-            "defaultValue": "https://raw.githubusercontent.com/erjosito/Iac-Test/master/",
+            "defaultValue": "https://raw.githubusercontent.com/erjosito/IaC-Test/master/",
             "type": "string",
             "metadata": { "description": "URL where the nested templates are downloaded from" }
         }
@@ -361,13 +361,13 @@
                     "ipConfigName": {"value": "[concat(parameters('vmName'), '-', copyIndex(1), '-ipConfig0')]"},
                     "vnetName": { "value": "[parameters('vnetName')]" },
                     "subnetName": { "value": "[parameters('subnet0Name')]"},
-                    "slbName": { "value": "[variables('lbNameExtInt')]"},
-                    "slbYesNo": { "value": "[parameters('deployLBYesNo')]"},
-                    "backendConfigName": { "value": "[variables('backendConfigNameExtInt')]"},
                     "pipYesNo": { "value": "[parameters('pipYesNo')]"},
+                    "slbYesNo": { "value": "[parameters('deployLBYesNo')]"},
                     "lbSku": { "value": "[parameters('lbSku')]"},
+                    "slbName": { "value": "[variables('lbNameExtInt')]"},
+                    "backendConfigName": { "value": "[variables('backendConfigNameExtInt')]"},
                     "azYesNo": { "value": "[parameters('azYesNo')]"},
-                    "az": { "value": "[string(add(mod(copyIndex(1), variables('maxZonen')), 1))]"}
+                    "az": { "value": "[string(add(mod(copyIndex(0), variables('maxZonen')), 1))]"}
                 }
             },
             "dependsOn": [
