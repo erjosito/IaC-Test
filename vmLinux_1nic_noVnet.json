@@ -193,7 +193,6 @@
     "resources": [
 		{
             "comments": "Availability set for eventual HA, only if no AZs are being used",
-            "condition": "[equals(parameters('azYesNo'), 'no')]",
 			"type": "Microsoft.Compute/availabilitySets",
 			"name": "[variables('avSetName')]",
 			"apiVersion": "[variables('computeApiVersion')]",
