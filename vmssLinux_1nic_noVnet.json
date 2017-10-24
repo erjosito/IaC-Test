@@ -178,7 +178,7 @@
         "slbBackendNameExtInt": "[variables('slbBackendNameExtIntHash')[parameters('lbType')]]",
         "loadBalancerBackendAddressPoolHash": {
             "yes": {
-                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('vmssDependsOn'), '/backendAddressPools/', variables('slbBackendNameExtInt')))]"                
+                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('vmssDependsOn')), '/backendAddressPools/', variables('slbBackendNameExtInt'))]"
             },
             "no": {
             }
