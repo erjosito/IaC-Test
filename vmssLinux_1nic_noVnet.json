@@ -371,7 +371,7 @@
                         }
                     },
                     "osProfile": {
-                        "computerNamePrefix": "[parameters('vmName')]",
+                        "computerNamePrefix": "[concat(parameters('vmName'), '-az', copyIndex(1))]",
                         "adminUsername": "[parameters('vmUsr')]",
                         "adminPassword": "[parameters('vmPwd')]"
                     },
