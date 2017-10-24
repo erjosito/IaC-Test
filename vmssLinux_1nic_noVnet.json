@@ -260,7 +260,6 @@
                                 "name": "nic0",
                                 "properties": {
                                     "primary": true,
-                                    "enableIPForwarding": true,
                                     "ipConfigurations": [
                                         {
                                             "name": "ipconfig0",
@@ -351,7 +350,6 @@
                                 "name": "nic0",
                                 "properties": {
                                     "primary": true,
-                                    "enableIPForwarding": true,
                                     "ipConfigurations": [
                                         {
                                             "name": "ipconfig0",
