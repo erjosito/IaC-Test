@@ -29,6 +29,21 @@
             "allowedValues": ["Standard_D2_v2", "Standard_D1_v2"],
             "metadata": { "description": "Choose your desired VM size" }
         },
+        "capacityMax": {
+            "defaultValue": 4,
+            "type": "int",
+            "metadata": { "description": "Maximum number of VMs per VMSS" }
+        },
+        "capacityMin": {
+            "defaultValue": 1,
+            "type": "int",
+            "metadata": { "description": "Minimum number of VMs per VMSS" }
+        },
+        "capacityDef": {
+            "defaultValue": 1,
+            "type": "int",
+            "metadata": { "description": "Default number of VMs per VMSS" }
+        },
 		"deployLBYesNo": {
 			"defaultValue": "yes",
 			"type": "string",
@@ -121,9 +136,9 @@
                 "azYesNo": { "value": "[parameters('azYesNo')]" },
                 "scriptUri": { "value": "[variables('customScriptUri')]" },
                 "scriptCmd": { "value": "[variables('customScriptCmd')]" },
-                "capacityMax": { "value": 4 },
-                "capacityMin": { "value": 1 },
-                "capacityDef": { "value": 1 },
+                "capacityMax": { "value": "[parameters('capacityMax')]" },
+                "capacityMin": { "value": "[parameters('capacityMin')]" },
+                "capacityDef": { "value": "[parameters('capacityDef')]" },
                 "cpuMax": { "value": 60 },
                 "cpuMin": { "value": 30 }
             }
