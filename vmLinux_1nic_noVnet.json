@@ -345,17 +345,17 @@
             ]
         },
 		{
-			"comments": "Create eth0",
+            "comments": "Nested template to create NIC, including PIP and NSG",
             "name": "[concat(parameters('vmName'), '-', copyIndex(1), '-nic')]",
-			"type": "Microsoft.Resources/deployments",
-			"apiVersion": "[variables('deploymentApiVersion')]",
-			"properties": {
-				"mode": "Incremental",
-				"templateLink": {
-					"uri": "[variables('nicUri')]",
-					"contentVersion": "1.0.0.0"
-				},
-				"parameters":  {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "[variables('deploymentApiVersion')]",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('nicUri')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters":  {
                     "nicName": {"value": "[concat(parameters('vmName'), '-', copyIndex(1), '-nic')]"},
                     "ipConfigName": {"value": "[concat(parameters('vmName'), '-', copyIndex(1), '-ipConfig0')]"},
                     "vnetName": { "value": "[parameters('vnetName')]" },
@@ -369,13 +369,13 @@
                     "az": { "value": "[string(add(mod(copyIndex(0), variables('maxZonen')), 1))]"}
                 }
             },
-            "dependsOn": [
-                "[variables('nicDependsOn')]"
-            ],
             "copy": {
                 "name": "[concat(parameters('vmName'), '-nic')]",
                 "count": "[parameters('vmCount')]"
-            }
+            },
+            "dependsOn": [
+                "[variables('nicDependsOn')]"
+            ]
         },
         {
             "type": "Microsoft.Compute/virtualMachines/extensions",
