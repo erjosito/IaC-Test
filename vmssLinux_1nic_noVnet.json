@@ -395,7 +395,7 @@
             "name": "[parameters('scaleSettingsName')]",
             "location": "[resourceGroup().location]",
             "dependsOn": [
-                "[concat('Microsoft.Compute/virtualMachineScaleSets/', variables('vmssNameHash')[parameters('azYesNo')])]"
+                "[concat('Microsoft.Compute/virtualMachineScaleSets/', variables('vmssNameHash')['no'])]"
             ],
             "properties": {
                 "name": "[parameters('scaleSettingsName')]",
@@ -465,7 +465,7 @@
                 "count": "[parameters('azCount')]"
             },
             "dependsOn": [
-                "[concat('Microsoft.Compute/virtualMachineScaleSets/', variables('vmssNameHash')[parameters('azYesNo')])]"
+                "[variables('vmssNameHash')['yes']]"
             ],
             "properties": {
                 "name": "[concat(parameters('scaleSettingsName'), '-az', copyIndex(1))]",
