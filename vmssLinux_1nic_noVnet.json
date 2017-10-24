@@ -299,8 +299,7 @@
             "location": "[resourceGroup().location]",
             "apiVersion": "[variables('computeApiVersion')]",
             "dependsOn": [
-                "slb-int",
-                "slb-ext"
+                "[variables('vmssDependsOn')]"
             ],
             "sku": {
                 "name": "[variables('settings')['vmSize']]",
