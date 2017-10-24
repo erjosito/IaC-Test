@@ -7,9 +7,9 @@
             "type": "string"
         },
         "vmType": {
-            "defaultValue": "ubuntu",
+            "defaultValue": "ubuntuScaleSet",
             "type": "string",
-            "allowedValues": ["ubuntu"]
+            "allowedValues": ["ubuntuScaleSet"]
         },
         "vmCount": {
             "defaultValue": 1,
@@ -103,7 +103,7 @@
         "vnetID": "[resourceId('Microsoft.Network/virtualNetworks', parameters('vnetName'))]",
         "subnet0Id": "[concat(variables('vnetID'), '/subnets/', parameters('subnet0Name'))]",
         "settingsTable": {
-            "ubuntu": {
+            "ubuntuScaleSet": {
                 "product": "UbuntuServer",
                 "publisher": "Canonical",
                 "sku": "16.04.0-LTS",
