@@ -89,6 +89,31 @@
             "type": "int",
             "metadata": { "description": "Number of VMSS that will be created (1 per zone)" }
         },
+        "capacityMax": {
+            "defaultValue": 4,
+            "type": "int",
+            "metadata": { "description": "Maximum number of VMs per VMSS" }
+        },
+        "capacityMin": {
+            "defaultValue": 1,
+            "type": "int",
+            "metadata": { "description": "Minimum number of VMs per VMSS" }
+        },
+        "capacityDef": {
+            "defaultValue": 1,
+            "type": "int",
+            "metadata": { "description": "Default number of VMs per VMSS" }
+        },
+        "cpuMin": {
+            "defaultValue": 30.0,
+            "type": "int",
+            "metadata": { "description": "CPU threshold to delete VMs" }
+        },
+        "cpuMax": {
+            "defaultValue": 70.0,
+            "type": "int",
+            "metadata": { "description": "CPU threshold to add VMs" }
+        },
         "baseRepoURL": {
             "defaultValue": "https://raw.githubusercontent.com/erjosito/Iac-Test/master/",
             "type": "string",
@@ -409,9 +434,9 @@
                     {
                         "name": "Profile1",
                         "capacity": {
-                            "minimum": "2",
-                            "maximum": "10",
-                            "default": "2"
+                            "minimum": "[parameters('capacityMin')]",
+                            "maximum": "[parameters('capacityMax')]",
+                            "default": "[parameters('capacityDef')]"
                         },
                         "rules": [
                             {
@@ -424,7 +449,7 @@
                                     "timeWindow": "PT5M",
                                     "timeAggregation": "Average",
                                     "operator": "GreaterThan",
-                                    "threshold": 60.0
+                                    "threshold": "[parameters('cpuMax')]"
                                 },
                                 "scaleAction": {
                                     "direction": "Increase",
@@ -443,7 +468,7 @@
                                     "timeWindow": "PT5M",
                                     "timeAggregation": "Average",
                                     "operator": "LessThan",
-                                    "threshold": 30.0
+                                    "threshold": "[parameters('cpuMin')]"
                                 },
                                 "scaleAction": {
                                     "direction": "Decrease",
@@ -479,9 +504,9 @@
                     {
                         "name": "Profile1",
                         "capacity": {
-                            "minimum": "2",
-                            "maximum": "10",
-                            "default": "2"
+                            "minimum": "[parameters('capacityMin')]",
+                            "maximum": "[parameters('capacityMax')]",
+                            "default": "[parameters('capacityDef')]"
                         },
                         "rules": [
                             {
@@ -494,7 +519,7 @@
                                     "timeWindow": "PT5M",
                                     "timeAggregation": "Average",
                                     "operator": "GreaterThan",
-                                    "threshold": 60.0
+                                    "threshold": "[parameters('cpuMax')]"
                                 },
                                 "scaleAction": {
                                     "direction": "Increase",
@@ -513,7 +538,7 @@
                                     "timeWindow": "PT5M",
                                     "timeAggregation": "Average",
                                     "operator": "LessThan",
-                                    "threshold": 30.0
+                                    "threshold": "[parameters('cpuMin')]"
                                 },
                                 "scaleAction": {
                                     "direction": "Decrease",

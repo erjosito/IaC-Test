@@ -112,7 +112,12 @@
                 "pipYesNo": { "value": "[parameters('pipYesNo')]" },
                 "azYesNo": { "value": "[parameters('azYesNo')]" },
                 "scriptUri": { "value": "[variables('customScriptUri')]" },
-                "scriptCmd": { "value": "[variables('customScriptCmd')]" }
+                "scriptCmd": { "value": "[variables('customScriptCmd')]" },
+                "capacityMax": { "value": 4 },
+                "capacityMin": { "value": 1 },
+                "capacityDef": { "value": 1 },
+                "cpuMax": { "value": 60.0 },
+                "cpuMin": { "value": 30.0 }
             }
         },
         "vmParams": "[variables('vmParamsHash')[parameters('vmType')]]",
