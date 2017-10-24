@@ -4,7 +4,7 @@
     "parameters": {
             "adminUsername": { "value": "lab-user" },
             "adminPassword": { "value": "Microsoft123!" },
-            "vmType": { "value": "ubuntuScaleSet" },
+            "vmType": { "value": "ubuntu" },
             "vmSize": { "value": "Standard_D1_v2" },
             "deployLBYesNo": { "value": "yes" },
             "lbSku": { "value": "standard" },
