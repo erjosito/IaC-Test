@@ -145,8 +145,6 @@
         "slbName": "[concat(parameters('vmName'), '-slb')]",
         "slbBackendName": "[concat(parameters('vmName'), '-slbBackend')]",
         "slbPipName": "[concat(parameters('vmName'), '-slbPip')]",
-        "ipPrefix": "[parameters('ipPrefix')]",
-        "vipSuffix": "[parameters('vipSuffix')]",
         "slbSubnet": "[parameters('subnet0Name')]",
 		"deployLBTemplate": {
 			"yes": "[concat(parameters('baseRepoURL'), 'slb.json')]",

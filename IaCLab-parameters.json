@@ -6,7 +6,7 @@
             "adminUsername": { "value": "lab-user" },
             "adminPassword": { "value": "Microsoft123!" },
             "vmName": { "value": "myvm" },
-            "vmType": { "value": "ubuntuScaleSet" },
+            "vmType": { "value": "ubuntu" },
             "vmSize": { "value": "Standard_D1_v2" },
             "capacityMin": { "value": 1 },
             "capacityDef": { "value": 1 },
