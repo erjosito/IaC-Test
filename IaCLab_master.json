@@ -44,6 +44,16 @@
             "type": "int",
             "metadata": { "description": "Default number of VMs per VMSS" }
         },
+        "cpuMin": {
+            "defaultValue": 30,
+            "type": "int",
+            "metadata": { "description": "CPU threshold to delete VMs" }
+        },
+        "cpuMax": {
+            "defaultValue": 70,
+            "type": "int",
+            "metadata": { "description": "CPU threshold to add VMs" }
+        },
 		"deployLBYesNo": {
 			"defaultValue": "yes",
 			"type": "string",
@@ -139,8 +149,8 @@
                 "capacityMax": { "value": "[parameters('capacityMax')]" },
                 "capacityMin": { "value": "[parameters('capacityMin')]" },
                 "capacityDef": { "value": "[parameters('capacityDef')]" },
-                "cpuMax": { "value": 60 },
-                "cpuMin": { "value": 30 }
+                "cpuMax": { "value": "[parameters('cpuMax')]" },
+                "cpuMin": { "value": "[parameters('cpuMin')]" }
             }
         },
         "vmParams": "[variables('vmParamsHash')[parameters('vmType')]]",
