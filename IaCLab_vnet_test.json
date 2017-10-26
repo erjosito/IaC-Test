@@ -23,12 +23,6 @@
                             "addressPrefix": "172.31.1.0/24"
                         }
                     },
-                    {
-                        "name": "subnet2",
-                        "properties": {
-                            "addressPrefix": "172.31.2.0/24"
-                        }
-                    }
                 ]
             },
             "resources": [],
