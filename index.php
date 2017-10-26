@@ -76,6 +76,7 @@
                         $metadataJson = shell_exec($cmd);
                         $metadata = json_decode($metadataJson, true);
                         $metaloc = $metadata["compute"]["location"];
+                        $metavmn = $metadata["compute"]["name"];
                         $metapfd = $metadata["compute"]["platformFaultDomain"];
                         $metapud = $metadata["compute"]["platformUpdateDomain"];
                         $metasub = $metadata["compute"]["subscriptionId"];
@@ -87,6 +88,7 @@
                         $metavid = $metadata["compute"]["vmId"];
                         ?>
                     <ul>
+                        <li>Name: <?php print ($metavmn); ?></li>
                         <li>Location: <?php print ($metaloc); ?></li>
                         <li>Fault Domain: <?php print ($metapfd); ?></li>
                         <li>Update Domain: <?php print ($metapud); ?></li>
@@ -98,6 +100,8 @@
                         <li>Resource Group: <?php print ($metargr); ?></li>
                         <li>VM GUID: <?php print ($metavid); ?></li>
                     </ul>
+                    <br>
+                    <p>Full instance metadata: <?php print ($metadataJson); ?> </p>
                 </div>
             </div>
         </div>
