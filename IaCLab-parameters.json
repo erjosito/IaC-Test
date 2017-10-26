@@ -15,7 +15,7 @@
             "lbSku": { "value": "standard" },
             "lbType": { "value": "external" }, 
             "pipYesNo": { "value": "yes" },
-            "azYesNo": { "value": "no" },
+            "azYesNo": { "value": "yes" },
             "nsgYesNo": { "value": "yes" }
         }
 }
