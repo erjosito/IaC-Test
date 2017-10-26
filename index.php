@@ -12,11 +12,13 @@
      <?php
         $hostname = exec('hostname');
         echo "         <li>Name: " . $hostname . "</li>\n";
+        echo "         <li>Software: " . $_SERVER['SERVER_SOFTWARE'] . "</li>\n";
+        $uname = exec('uname -a');
+        echo "         <li>Kernel info: " . $ip . "</li>\n";
         $ip = exec('hostname -i');
         echo "         <li>IP address: " . $ip . "</li>\n";
-        echo "         <li>Software: " . $_SERVER['SERVER_SOFTWARE'] . "</li>\n";
-        $pip = exec('curl ifconfig');
-        echo "         <li>Name: " . $pip . "</li>\n";
+        $pip = exec('curl ifconfig.co');
+        echo "         <li>Public IP: " . $pip . "</li>\n";
         ?>
      </ul>
      <br>
