@@ -192,7 +192,8 @@
         "deployLBextParameters": "[variables('deployLBextParametersHash')[parameters('deployLBYesNo')]]",
         "vmssDependsOnHash": {
             "internal": "[concat(variables('slbName'), '-int')]",
-            "external": "[concat(variables('slbName'), '-ext')]"
+            "external": "[concat(variables('slbName'), '-ext')]",
+            "both": "[concat(variables('slbName'), '-ext')]"
         },
         "vmssDependsOn": "[variables('vmssDependsOnHash')[parameters('lbType')]]",
         "vmssNameHash": {
@@ -231,7 +232,7 @@
 			}
 		},
 		{
-			"comments": "Optionally, create an external load balancer",
+			"comments": "Optionally, create an external load balancer. Wait until the internal one has finished",
             "condition": "[or(equals(parameters('lbType'), 'external'), equals(parameters('lbType'), 'both'))]",
             "name": "[concat(variables('slbName'), '-ext')]",
 			"type": "Microsoft.Resources/deployments",
@@ -245,6 +246,7 @@
 				"parameters":  "[variables('deployLBextParameters')]"
 			},
             "dependsOn": [
+                "[concat(variables('slbName'), '-int')]"
             ]
 		},
         {
