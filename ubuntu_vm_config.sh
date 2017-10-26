@@ -11,4 +11,7 @@ sudo systemctl restart apache2
 sudo rm /var/www/html/index.html
 sudo apt-get install wget -you
 sudo wget https://raw.githubusercontent.com/erjosito/IaC-Test/master/index.php -P /var/www/html/
+sudo wget https://raw.githubusercontent.com/erjosito/IaC-Test/master/styles.css -P /var/www/html/
+sudo wget https://raw.githubusercontent.com/erjosito/IaC-Test/master/apple-touch-icon.png -P /var/www/html/
+sudo wget https://raw.githubusercontent.com/erjosito/IaC-Test/master/favicon.ico -P /var/www/html/
 
