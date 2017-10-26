@@ -209,9 +209,9 @@
                 }
             },
             "resources": [],
-            "dependsOn": [
+            "dependsOn":
                 "[variables('nicDependsOn')]"
-            ]
+
         }
     ]
 }
