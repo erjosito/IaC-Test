@@ -98,15 +98,6 @@
         "maxZonen": 3,   
 		"diskType": "Standard_LRS",
         "diskSize": 32,
-        "vmOsProfile": {
-            "computerName": "[parameters('vmName')]",
-            "adminUsername": "[parameters('vmUsr')]",
-            "linuxConfiguration": {
-                "disablePasswordAuthentication": false
-            },
-            "secrets": [],
-            "adminPassword": "[parameters('vmPwd')]"				
-        },
         "settingsTable": {
             "ubuntu": {
                 "product": "UbuntuServer",
@@ -265,9 +256,17 @@
                         }
                     },
                     "dataDisks": []
-                },        
-                "osProfile": "[variables('vmOsProfile')]",
-                "networkProfile": {
+                },
+                "osProfile": {
+                    "computerName": "[concat(parameters('vmName'), '-', copyIndex(1))]",
+                    "adminUsername": "[parameters('vmUsr')]",
+                    "linuxConfiguration": {
+                        "disablePasswordAuthentication": false
+                    },
+                    "secrets": [],
+                    "adminPassword": "[parameters('vmPwd')]"				
+                },
+                        "networkProfile": {
                     "networkInterfaces": [
                         {
                             "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(parameters('vmName'), '-', copyIndex(1), '-nic'))]",
@@ -323,7 +322,15 @@
                     },
                     "dataDisks": []
                 },
-                "osProfile": "[variables('vmOsProfile')]",
+                "osProfile": {
+                    "computerName": "[concat(parameters('vmName'), '-', copyIndex(1))]",
+                    "adminUsername": "[parameters('vmUsr')]",
+                    "linuxConfiguration": {
+                        "disablePasswordAuthentication": false
+                    },
+                    "secrets": [],
+                    "adminPassword": "[parameters('vmPwd')]"				
+                },
                 "networkProfile": {
                     "networkInterfaces": [
                         {

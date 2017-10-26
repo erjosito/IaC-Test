@@ -7,7 +7,7 @@
        Welcome to my humble VM
      </h1>
      <br>
-     <p>Some info about me...</p>
+     <p>Some info about me:</p>
      <ul>
      <?php
         $hostname = exec('hostname');
@@ -22,7 +22,7 @@
         ?>
      </ul>
      <br>
-     <p>Information retrieved out of the public IP</p>
+     <p>Information retrieved out of the public IP:</p>
      <?php
             $cmd = "curl freegeoip.net/json/" . $pip;
             $locationInfo = shell_exec($cmd);
@@ -37,7 +37,7 @@
         <li>City: <?php print ($city); ?></li>
     </ul>
     <br>
-     <p>Information retrieved out of the instance metadata</p>
+     <p>Information retrieved out of the instance metadata:</p>
     <?php
         # Example output: lab-user@myvm:~$ curl -H Metadata:true http://169.254.169.254/metadata/instance?api-version=2017-08-01
         # {"compute":{"location":"westeurope","name":"myvm-az-1","offer":"UbuntuServer","osType":"Linux","placementGroupId":"",
