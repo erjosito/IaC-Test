@@ -14,7 +14,7 @@
             "deployLBYesNo": { "value": "yes" },
             "lbSku": { "value": "standard" },
             "lbType": { "value": "external" }, 
-            "pipYesNo": { "value": "no" },
+            "pipYesNo": { "value": "yes" },
             "azYesNo": { "value": "yes" }
         }
 }

@@ -6,8 +6,8 @@
      <h1>
        Welcome to my humble VM
      </h1>
-    <p>Some info about me...</p>
      <br>
+     <p>Some info about me...</p>
      <ul>
      <?php
         $hostname = exec('hostname');
