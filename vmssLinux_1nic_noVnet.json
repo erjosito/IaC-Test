@@ -89,6 +89,11 @@
 			"type": "string",
             "allowedValues": [ "yes","no" ]
         },
+		"nsgYesNo": {
+			"defaultValue": "yes",
+			"type": "string",
+            "allowedValues": [ "yes","no" ]
+        },
         "azCount": {
             "defaultValue": 2,
             "type": "int",
@@ -142,6 +147,7 @@
             }
         },
         "settings": "[variables('settingsTable')[parameters('vmType')]]",
+        "nsgName": "[concat(parameters('vmName'), '-nsg')]",
         "slbName": "[concat(parameters('vmName'), '-slb')]",
         "slbBackendName": "[concat(parameters('vmName'), '-slbBackend')]",
         "slbPipName": "[concat(parameters('vmName'), '-slbPip')]",
@@ -190,12 +196,19 @@
             }
         },
         "deployLBextParameters": "[variables('deployLBextParametersHash')[parameters('deployLBYesNo')]]",
-        "vmssDependsOnHash": {
+        "dummyDeploymentName": "[concat(parameters('vmName'), '-dummy')]",
+        "dummyDeploymentTemplate": "[concat(parameters('baseRepoURL'), 'nothing.json')]",
+        "vmssDependsOnSlbHash": {
             "internal": "[concat(variables('slbName'), '-int')]",
             "external": "[concat(variables('slbName'), '-ext')]",
             "both": "[concat(variables('slbName'), '-ext')]"
         },
-        "vmssDependsOn": "[variables('vmssDependsOnHash')[parameters('lbType')]]",
+        "vmssDependsOnSlb": "[variables('vmssDependsOnSlbHash')[parameters('lbType')]]",
+        "vmssDependsOnNsgHash": {
+            "yes": "[variables('nsgName')]",
+            "no": "[variables('dummyDeploymentName')]"
+        },
+        "vmssDependsOnNsg": "[variables('vmssDependsOnNsgHash')[parameters('nsgYesNo')]]",
         "vmssNameHash": {
             "yes": "[concat(parameters('vmssName'), '-az')]",
             "no": "[parameters('vmssName')]"
@@ -208,7 +221,7 @@
         "slbBackendNameExtInt": "[variables('slbBackendNameExtIntHash')[parameters('lbType')]]",
         "lbBackendAddressPoolHash": {
             "yes": {
-                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('vmssDependsOn')), '/backendAddressPools/', variables('slbBackendNameExtInt'))]"
+                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('vmssDependsOnSlb')), '/backendAddressPools/', variables('slbBackendNameExtInt'))]"
             },
             "no": {
             }
@@ -217,15 +230,63 @@
         "lbInboundNatPoolName": "linuxPool",
         "lbInboundNatPoolHash": {
             "yes": {
-                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('vmssDependsOn')), '/inboundNatPools/', variables('lbInboundNatPoolName'))]"
+                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('vmssDependsOnSlb')), '/inboundNatPools/', variables('lbInboundNatPoolName'))]"
             },
             "no": {
             }
         },
         "lbInboundNatPoolYesNo": "[if(or(equals(parameters('deployLBYesNo'), 'no'),equals(parameters('lbType'), 'internal')),'no','yes')]",
-        "lbInboundNatPool": "[variables('lbInboundNatPoolHash')[variables('lbInboundNatPoolYesNo')]]"
+        "lbInboundNatPool": "[variables('lbInboundNatPoolHash')[variables('lbInboundNatPoolYesNo')]]",
+        "vmssNsgHash": {
+            "yes": {
+                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('nsgName'))]"
+            },
+            "no": {
+            }
+        },
+        "vmssNsg": "[variables('vmssNsgHash')[parameters('nsgYesNo')]]"
     },
     "resources": [
+        {
+            "comments": "NSGs not required, but here for extra security",
+            "condition": "[equals(parameters('nsgYesNo'), 'yes')]",
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "name": "[variables('nsgName')]",
+            "apiVersion": "[variables('networkApiVersion')]",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "securityRules": [
+                    {
+                        "name": "default-allow-ssh",
+                        "properties": {
+                            "protocol": "TCP",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "22",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 1000,
+                            "direction": "Inbound"
+                        }
+                    },
+                    {
+                        "name": "default-allow-web",
+                        "properties": {
+                            "protocol": "TCP",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "80",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 1010,
+                            "direction": "Inbound"
+                        }
+                    }
+                ]
+            },
+            "resources": [],
+            "dependsOn": []
+        },
 		{
 			"comments": "Optionally, create an internal load balancer",
             "condition": "[or(equals(parameters('lbType'), 'internal'), equals(parameters('lbType'), 'both'))]",
@@ -267,7 +328,7 @@
             "location": "[resourceGroup().location]",
             "apiVersion": "[variables('computeApiVersion')]",
             "dependsOn": [
-                "[variables('vmssDependsOn')]"
+                "[variables('vmssDependsOnSlb')]", "[variables('vmssDependsOnNsg')]"
             ],
             "sku": {
                 "name": "[variables('settings')['vmSize']]",
@@ -301,7 +362,7 @@
                                 "name": "eth0",
                                 "properties": {
                                     "primary": true,
-                                    "networkSecurityGroup": {},
+                                    "networkSecurityGroup": "[variables('vmssNsg')]",
                                     "ipConfigurations": [
                                         {
                                             "name": "ipconfig0",
@@ -354,7 +415,7 @@
             "location": "[resourceGroup().location]",
             "apiVersion": "[variables('computeApiVersion')]",
             "dependsOn": [
-                "[variables('vmssDependsOn')]"
+                "[variables('vmssDependsOnSlb')]", "[variables('vmssDependsOnNsg')]"
             ],
             "copy": {
                 "name": "[variables('vmssNameHash')['yes']]",
@@ -395,6 +456,7 @@
                                 "name": "nic0",
                                 "properties": {
                                     "primary": true,
+                                    "networkSecurityGroup": "[variables('vmssNsg')]",
                                     "ipConfigurations": [
                                         {
                                             "name": "ipconfig0",
@@ -574,6 +636,21 @@
                     }
                 ]
             }
+        },
+		{
+			"comments": "Dummy Deployment for fake dependency for the NIC, in case no PIP is required",
+            "name": "[variables('dummyDeploymentName')]",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "[variables('deploymentApiVersion')]",
+			"properties": {
+				"mode": "Incremental",
+				"templateLink": {
+					"uri": "[variables('dummyDeploymentTemplate')]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters":  {}
+			},
+            "dependsOn": []
         }
      ]
 }

@@ -74,6 +74,11 @@
 			"type": "string",
             "allowedValues": [ "yes","no" ]
 		},
+		"nsgYesNo": {
+			"defaultValue": "yes",
+			"type": "string",
+            "allowedValues": [ "yes","no" ]
+		},
         "lbSku": {
             "defaultValue": "basic",
             "type": "string",
@@ -373,6 +378,7 @@
                     "slbName": { "value": "[variables('lbNameExtInt')]" },
                     "backendConfigName": { "value": "[variables('backendConfigNameExtInt')]" },
                     "azYesNo": { "value": "[parameters('azYesNo')]" },
+                    "nsgYesNo": { "value": "[parameters('nsgYesNo')]" },
                     "az": { "value": "[string(add(mod(copyIndex(0), variables('maxZonen')), 1))]" }
                 }
             },

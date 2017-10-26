@@ -59,11 +59,16 @@
 			"type": "string",
             "allowedValues": [ "yes","no" ]
 		},
-		"pipYesNo": {
-			"defaultValue": "yes",
-			"type": "string",
+        "pipYesNo": {
+            "defaultValue": "yes",
+            "type": "string",
             "allowedValues": [ "yes","no" ]
-		},
+        },
+        "nsgYesNo": {
+            "defaultValue": "yes",
+            "type": "string",
+            "allowedValues": [ "yes","no" ]
+        },
 		"azYesNo": {
 			"defaultValue": "yes",
 			"type": "string",
@@ -121,6 +126,7 @@
                 "vipSuffix": { "value": "[variables('vipSuffix')]" },
                 "pipYesNo": { "value": "[parameters('pipYesNo')]" },
                 "azYesNo": { "value": "[parameters('azYesNo')]" },
+                "nsgYesNo": { "value": "[parameters('nsgYesNo')]" },
                 "lbSku": { "value": "[parameters('lbSku')]" },
                 "lbType": { "value": "[parameters('lbType')]" },
                 "scriptUri": { "value": "[variables('customScriptUri')]" },
@@ -144,6 +150,7 @@
                 "vipSuffix": { "value": "[variables('vipSuffix')]" },
                 "pipYesNo": { "value": "[parameters('pipYesNo')]" },
                 "azYesNo": { "value": "[parameters('azYesNo')]" },
+                "nsgYesNo": { "value": "[parameters('nsgYesNo')]" },
                 "scriptUri": { "value": "[variables('customScriptUri')]" },
                 "scriptCmd": { "value": "[variables('customScriptCmd')]" },
                 "capacityMax": { "value": "[parameters('capacityMax')]" },

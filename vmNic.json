@@ -35,16 +35,21 @@
             "type": "string",
             "allowedValues": [ "yes","no" ]
         },
-		"azYesNo": {
-			"defaultValue": "no",
-			"type": "string",
+        "azYesNo": {
+            "defaultValue": "no",
+            "type": "string",
             "allowedValues": [ "yes","no" ]
-		},
+        },
 		"az": {
 			"defaultValue": "1",
 			"type": "string",
             "allowedValues": [ "1","2","3" ]
 		},
+        "nsgYesNo": {
+            "defaultValue": "no",
+            "type": "string",
+            "allowedValues": [ "yes","no" ]
+        },
         "lbSku": {
             "defaultValue": "basic",
             "type": "string",
@@ -138,7 +143,20 @@
             "basic": "Dynamic",
             "standard": "Static"
         },
-        "pipAllocation": "[variables('pipAllocationHash')[variables('pipSku')]]"
+        "pipAllocation": "[variables('pipAllocationHash')[variables('pipSku')]]",
+        "nicDependsOnNsgHash": {
+            "yes": "[variables('nsgName')]",
+            "no": "[variables('dummyDeploymentName')]"
+        },
+        "nicDependsOnNsg": "[variables('nicDependsOnNsgHash')[parameters('nsgYesNo')]]",
+        "nicNsgHash": {
+            "yes": {
+                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('nsgName'))]"
+            },
+            "no": {
+            }
+        },
+        "nicNsg": "[variables('nicNsgHash')[parameters('nsgYesNo')]]"
     },
     "resources": [
         {
@@ -160,7 +178,8 @@
             "dependsOn": []
         },
         {
-			"comments": "NSGs not required, but here for extra security",
+            "comments": "Create Network Security Group only if instructed by the parameter 'nsgYesNo'",
+            "condition": "[equals(parameters('nsgYesNo'), 'yes')]",
             "type": "Microsoft.Network/networkSecurityGroups",
             "name": "[variables('nsgName')]",
             "apiVersion": "[variables('networkApiVersion')]",
@@ -199,7 +218,7 @@
             "dependsOn": []
         },
 		{
-			"comments": "Dummy Deployment for fake dependency for the NIC, in case no PIP is required",
+			"comments": "Dummy Deployment for fake dependency for the NIC, in case no PIP or NSG is required",
             "name": "[variables('dummyDeploymentName')]",
 			"type": "Microsoft.Resources/deployments",
 			"apiVersion": "[variables('deploymentApiVersion')]",
@@ -227,13 +246,11 @@
                     "dnsServers": []
                 },
                 "enableIPForwarding": false,
-                "networkSecurityGroup": {
-                    "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('nsgName'))]"
-                }
+                "networkSecurityGroup": "[variables('nicNsg')]"
             },
             "resources": [],
             "dependsOn": [
-                "[variables('nsgName')]", "[variables('nicDependsOnPip')]"
+                "[variables('nsgName')]", "[variables('nicDependsOnPip')]", "[variables('nicDependsOnNsg')]"  
             ]
         }
     ]
