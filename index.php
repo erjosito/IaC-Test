@@ -16,9 +16,9 @@
         $uname = exec('uname -a');
         echo "         <li>Kernel info: " . $uname . "</li>\n";
         $ip = exec('hostname -i');
-        echo "         <li>IP address: " . $ip . "</li>\n";
+        echo "         <li>Private IP address: " . $ip . "</li>\n";
         $pip = exec('curl ifconfig.co');
-        echo "         <li>Public IP: " . $pip . "</li>\n";
+        echo "         <li>Public IP address: " . $pip . "</li>\n";
         ?>
      </ul>
      <br>
