@@ -50,9 +50,15 @@
             "type": "string",
             "allowedValues": [ "basic","standard" ],
             "metadata": { "description": "Whether Load Balancers should be Basic or Standard (preview)" }
+        },
+        "baseRepoURL": {
+            "defaultValue": "https://raw.githubusercontent.com/erjosito/IaC-Test/master/",
+            "type": "string",
+            "metadata": { "description": "URL where the nested templates are downloaded from" }
         }
     },
     "variables": {
+        "deploymentApiVersion": "2017-08-01",
         "networkApiVersion": "2017-09-01",
         "nsgName": "[concat(parameters('nicName'), '-nsg')]",
         "pipName": "[concat(parameters('nicName'), '-pip')]",
@@ -120,11 +126,13 @@
             "no": []
         },
         "zones": "[variables('zonesHash')[parameters('azYesNo')]]",
-        "nicDependsOnHash": {
-            "yes": [ "[variables('nsgName')]", "[variables('pipName')]" ],
-            "no": "[variables('nsgName')]"
+        "dummyDeploymentName": "dummy-deployment",
+        "dummyDeploymentTemplate": "[concat(parameters('baseRepoURL'), 'nothing.json')]",
+        "nicDependsOnPipHash": {
+            "yes": "[variables('pipName')]",
+            "no": "[variables('dummyDeploymentName')]"
         },
-        "nicDependsOn": "[variables('nicDependsOnHash')[parameters('pipYesNo')]]",
+        "nicDependsOnPip": "[variables('nicDependsOnPipHash')[parameters('pipYesNo')]]",
         "pipSku": "[parameters('lbSku')]",
         "pipAllocationHash": {
             "basic": "Dynamic",
@@ -190,6 +198,21 @@
             "resources": [],
             "dependsOn": []
         },
+		{
+			"comments": "Dummy Deployment for fake dependency for the NIC, in case no PIP is required",
+            "name": "[variables('dummyDeploymentName')]",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "[variables('deploymentApiVersion')]",
+			"properties": {
+				"mode": "Incremental",
+				"templateLink": {
+					"uri": "[variables('dummyDeploymentTemplate')]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters":  {}
+			},
+            "dependsOn": []
+        },
         {
 			"comments": "Create NIC",
             "type": "Microsoft.Network/networkInterfaces",
@@ -209,9 +232,9 @@
                 }
             },
             "resources": [],
-            "dependsOn":
-                "[variables('nicDependsOn')]"
-
+            "dependsOn": [
+                "[variables('nsgName')]", "[variables('nicDependsOnPip')]"
+            ]
         }
     ]
 }

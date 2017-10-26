@@ -185,7 +185,7 @@
         "nicDependsOnHash": {
             "internal": "slb-int",
             "external": "slb-ext",
-            "both": "slb-int"
+            "both": "slb-ext"
         },
         "nicDependsOn": "[variables('nicDependsOnHash')[parameters('lbType')]]"
     },
