@@ -20,7 +20,7 @@
                     {
                         "name": "subnet1",
                         "properties": {
-                            "addressPrefix": "172.31.1.0/24"
+                            "addressPrefix": "172.31.11.0/24"
                         }
                     },
                 ]
