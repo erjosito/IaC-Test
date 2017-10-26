@@ -29,6 +29,11 @@
             "allowedValues": ["Standard_D2_v2", "Standard_D1_v2"],
             "metadata": { "description": "Choose your desired VM size" }
         },
+        "vmCount": {
+            "defaultValue": 2,
+            "type": "int",
+            "metadata": { "description": "How many individual VMs are created" }
+        },
         "capacityMax": {
             "defaultValue": 4,
             "type": "int",
@@ -135,7 +140,7 @@
             "ubuntuScaleSet": {
                 "baseRepoURL": { "value": "[variables('baseRepoURL')]" },
                 "vmType": { "value": "[parameters('vmType')]" },
-                "vmCount": { "value": 2 },
+                "vmCount": { "value": "[parameters('vmCount')]" },
                 "vmName": { "value": "[parameters('vmName')]" },
                 "vmSize": { "value": "[parameters('vmSize')]" },
                 "vmssName": { "value": "[parameters('vmName')]" },
