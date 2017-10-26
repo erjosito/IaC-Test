@@ -24,7 +24,7 @@
                         }
                     },
                     {
-                        "name": "subnet2",
+                        "name": "subnet-2",
                         "properties": {
                             "addressPrefix": "172.31.2.0/24"
                         }
