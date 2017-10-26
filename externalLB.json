@@ -63,7 +63,9 @@
     },
     "variables": {
         "networkApiVersion": "2017-09-01",
-		"frontendConfigName": "myFrontendConfig",
+        "frontendConfigName": "myFrontendConfig",
+        "windowsNatPoolName": "windowsPool",
+        "linuxNatPoolName": "linuxPool",        
 		"probeName": "myProbe",
         "dsrBoolHash": {
             "true": true,
@@ -153,9 +155,34 @@
                         }
                     }
                 ],
-                "inboundNatRules": [],
-                "outboundNatRules": [],
-                "inboundNatPools": []
+                "inboundNatPools": [
+                    {
+                      "name": "[variables('windowsNatPoolName')]",
+                      "properties": {
+                        "frontendIPConfiguration": {
+                          "id": "[concat( resourceId('Microsoft.Network/loadBalancers', parameters('slbName')), '/frontendIPConfigurations/', variables('frontendConfigName'))]"
+                        },
+                        "protocol": "tcp",
+                        "frontendPortRangeStart": "50001",
+                        "frontendPortRangeEnd": "50099",
+                        "backendPort": "3389"
+                      }
+                    },
+                    {
+                        "name": "[variables('linuxNatPoolName')]",
+                        "properties": {
+                          "frontendIPConfiguration": {
+                            "id": "[concat( resourceId('Microsoft.Network/loadBalancers', parameters('slbName')), '/frontendIPConfigurations/', variables('frontendConfigName'))]"
+                          },
+                          "protocol": "tcp",
+                          "frontendPortRangeStart": "50101",
+                          "frontendPortRangeEnd": "50199",
+                          "backendPort": "22"
+                        }
+                      }
+                    ],
+                  "inboundNatRules": [],
+                  "outboundNatRules": []
             },
             "resources": [],
             "dependsOn": [

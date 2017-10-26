@@ -206,14 +206,24 @@
             "external": "[concat(variables('slbBackendName'), '-ext')]"
         },
         "slbBackendNameExtInt": "[variables('slbBackendNameExtIntHash')[parameters('lbType')]]",
-        "loadBalancerBackendAddressPoolHash": {
+        "lbBackendAddressPoolHash": {
             "yes": {
                 "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('vmssDependsOn')), '/backendAddressPools/', variables('slbBackendNameExtInt'))]"
             },
             "no": {
             }
         },
-        "loadBalancerBackendAddressPool": "[variables('loadBalancerBackendAddressPoolHash')[parameters('deployLBYesNo')]]"
+        "lbBackendAddressPool": "[variables('lbBackendAddressPoolHash')[parameters('deployLBYesNo')]]",
+        "lbInboundNatPoolName": "linuxPool",
+        "lbInboundNatPoolHash": {
+            "yes": {
+                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('vmssDependsOn')), '/inboundNatPools/', variables('lbInboundNatPoolName'))]"
+            },
+            "no": {
+            }
+        },
+        "lbInboundNatPoolYesNo": "[if(or(equals(parameters('deployLBYesNo'), 'no'),equals(parameters('lbType'), 'internal')),'no','yes')]",
+        "lbInboundNatPool": "[variables('lbInboundNatPoolHash')[variables('lbInboundNatPoolYesNo')]]"
     },
     "resources": [
 		{
@@ -288,9 +298,10 @@
                     "networkProfile": {
                         "networkInterfaceConfigurations": [
                             {
-                                "name": "nic0",
+                                "name": "eth0",
                                 "properties": {
                                     "primary": true,
+                                    "networkSecurityGroup": {},
                                     "ipConfigurations": [
                                         {
                                             "name": "ipconfig0",
@@ -299,7 +310,10 @@
                                                     "id": "[variables('subnet0Id')]"
                                                 },
                                                 "loadBalancerBackendAddressPools": [
-                                                    "[variables('loadBalancerBackendAddressPool')]"
+                                                    "[variables('lbBackendAddressPool')]"
+                                                ],
+                                                "loadBalancerInboundNatPools": [
+                                                      "[variables('lbInboundNatPool')]"
                                                 ]
                                             }
                                         }
@@ -389,9 +403,12 @@
                                                     "id": "[variables('subnet0Id')]"
                                                 },
                                                 "loadBalancerBackendAddressPools": [
-                                                    "[variables('loadBalancerBackendAddressPool')]"
-                                                ]
-                                            }
+                                                    "[variables('lbBackendAddressPool')]"
+                                                ],
+                                                "loadBalancerInboundNatPools": [
+                                                    "[variables('lbInboundNatPool')]"
+                                              ]
+                                          }
                                         }
                                     ]
                                 }
