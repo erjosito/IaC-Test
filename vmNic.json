@@ -126,7 +126,7 @@
             "no": []
         },
         "zones": "[variables('zonesHash')[parameters('azYesNo')]]",
-        "dummyDeploymentName": "dummy-deployment",
+        "dummyDeploymentName": "[concat(parameters('nicName'), '-dummy')]",
         "dummyDeploymentTemplate": "[concat(parameters('baseRepoURL'), 'nothing.json')]",
         "nicDependsOnPipHash": {
             "yes": "[variables('pipName')]",
