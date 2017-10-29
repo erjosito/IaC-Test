@@ -34,6 +34,8 @@ These ARM functions do not use output variables, mainly due to the fact that the
 
 ## Examples using the main template
 
+The following examples assume a Linux OS, if you use Windows you don't need the escape character "\" before the underscore signs, and the line break signs might be different. 
+
 <pre lang="">
 az group deployment create -g azlab --name azLabDeployment --template-uri https://raw.githubusercontent.com/erjosito/Iac-Test/master/IaCLab\_master.json --parameters '{ \
   "adminUsername":{"value":"lab-user"}, \
@@ -49,3 +51,6 @@ az group deployment create -g azlab --name azLabDeployment --template-uri https:
   "lbType":{"value":"external"}, \
   "lbSku":{"value":"standard"}}'
 </pre>
+
+## To Do
+* Use the function deployment().properties.templateLink.uri for base URI handling

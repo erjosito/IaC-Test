@@ -54,11 +54,11 @@
             "type": "string",
             "metadata": { "description": "Command to run the script" }
         },
-		"deployLBYesNo": {
-			"defaultValue": "yes",
-			"type": "string",
+        "deployLBYesNo": {
+            "defaultValue": "yes",
+            "type": "string",
             "allowedValues": [ "yes","no" ]
-		},
+        },
         "lbSku": {
             "defaultValue": "basic",
             "type": "string",
@@ -235,7 +235,8 @@
             "no": {
             }
         },
-        "lbInboundNatPoolYesNo": "[if(or(equals(parameters('deployLBYesNo'), 'no'),equals(parameters('lbType'), 'internal')),'no','yes')]",
+        "lbInboundNatPoolYesNoOld": "[if(or(equals(parameters('deployLBYesNo'), 'no'),equals(parameters('lbType'), 'internal')),'no','yes')]",
+        "lbInboundNatPoolYesNo": "no",
         "lbInboundNatPool": "[variables('lbInboundNatPoolHash')[variables('lbInboundNatPoolYesNo')]]",
         "vmssNsgHash": {
             "yes": {
