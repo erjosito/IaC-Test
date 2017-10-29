@@ -34,3 +34,18 @@ These ARM functions do not use output variables, mainly due to the fact that the
 
 ## Examples using the main template
 
+<pre lang="">
+az group deployment create -g azlab --name azLabDeployment --template-uri https://raw.githubusercontent.com/erjosito/Iac-Test/master/IaCLab\_master.json --parameters '{ \
+  "adminUsername":{"value":"lab-user"}, \
+  "adminPassword":{"value":"yourSuperSecretPassword"}, \
+  "vmType":{"value":"ubuntuScaleSet"}, \
+  "vmSize":{"value":"Standard_D1_v2"}, \
+  "CapacityMin":{"value": 1}, \
+  "CapacityDef":{"value": 2}, \
+  "CapacityMax":{"value": 4}, \
+  "azYesNo":{"value":"yes"}, \
+  "pipYesNo":{"value":"no"}, \
+  "deployLBYesNo":{"value":"yes"}, \
+  "lbType":{"value":"external"}, \
+  "lbSku":{"value":"standard"}}'
+</pre>
