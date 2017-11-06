@@ -1,0 +1,649 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "vnetName": {
+            "defaultValue": "myVnet",
+            "type": "string"
+        },
+        "vmType": {
+            "defaultValue": "ubuntuScaleSet",
+            "type": "string",
+            "allowedValues": ["ubuntuScaleSet"]
+        },
+        "vmCount": {
+            "defaultValue": 1,
+            "type": "int"
+        },
+        "vmName": {
+            "defaultValue": "[concat('nva',uniqueString(resourceGroup().id))]",
+            "type": "string"
+        },
+        "vmSize": {
+            "defaultValue": "Standard_D2_v2",
+            "type": "string",
+            "allowedValues": ["Standard_D2_v2", "Standard_D1_v2"]
+        },
+        "vmssName": {
+            "defaultValue": "[concat('nvaVMSS',uniqueString(resourceGroup().id))]",
+            "type": "string"
+        },
+        "scaleSettingsName": {
+            "defaultValue": "VMSSsettings",
+            "type": "string"
+        },
+        "vmUsr": {
+            "defaultValue": "myadmin",
+            "type": "string"
+        },
+        "vmPwd": {
+            "defaultValue": null,
+            "type": "securestring"
+        },
+        "subnet0Name": {
+            "defaultValue": "subnet1",
+            "type": "string"
+        },
+        "scriptUri": {
+            "defaultValue": "https://raw.githubusercontent.com/erjosito/IaC-Test/master/ubuntu-vm-config.sh",
+            "type": "string",
+            "metadata": { "description": "Script that will be executed" }
+        },
+        "scriptCmd": {
+            "defaultValue": "sh linuxNVAconfig.sh",
+            "type": "string",
+            "metadata": { "description": "Command to run the script" }
+        },
+        "deployLBYesNo": {
+            "defaultValue": "yes",
+            "type": "string",
+            "allowedValues": [ "yes","no" ]
+        },
+        "lbSku": {
+            "defaultValue": "basic",
+            "type": "string",
+            "allowedValues": [ "basic","standard" ],
+            "metadata": { "description": "Whether Load Balancers should be Basic or Standard (preview)" }
+        },
+        "lbType": {
+            "defaultValue": "external",
+            "type": "string",
+            "allowedValues": [ "external", "internal", "both" ],
+            "metadata": { "description": "Whether Load Balancers should be internal or external" }
+        },
+		"ipPrefix": {
+			"defaultValue": "10.0.0",
+			"type": "string"
+		},
+		"vipSuffix": {
+			"defaultValue": "10.0.0",
+			"type": "string"
+		},
+		"pipYesNo": {
+			"defaultValue": "yes",
+			"type": "string",
+            "allowedValues": [ "yes","no" ]
+		},
+		"azYesNo": {
+			"defaultValue": "yes",
+			"type": "string",
+            "allowedValues": [ "yes","no" ]
+        },
+		"nsgYesNo": {
+			"defaultValue": "yes",
+			"type": "string",
+            "allowedValues": [ "yes","no" ]
+        },
+        "azCount": {
+            "defaultValue": 2,
+            "type": "int",
+            "metadata": { "description": "Number of VMSS that will be created (1 per zone)" }
+        },
+        "capacityMax": {
+            "defaultValue": 4,
+            "type": "int",
+            "metadata": { "description": "Maximum number of VMs per VMSS" }
+        },
+        "capacityMin": {
+            "defaultValue": 1,
+            "type": "int",
+            "metadata": { "description": "Minimum number of VMs per VMSS" }
+        },
+        "capacityDef": {
+            "defaultValue": 1,
+            "type": "int",
+            "metadata": { "description": "Default number of VMs per VMSS" }
+        },
+        "cpuMin": {
+            "defaultValue": 30,
+            "type": "int",
+            "metadata": { "description": "CPU threshold to delete VMs" }
+        },
+        "cpuMax": {
+            "defaultValue": 70,
+            "type": "int",
+            "metadata": { "description": "CPU threshold to add VMs" }
+        },
+        "baseRepoURL": {
+            "defaultValue": "https://raw.githubusercontent.com/erjosito/Iac-Test/master/",
+            "type": "string",
+            "metadata": { "description": "URL where the nested templates are downloaded from" }
+        }
+    },
+    "variables": {
+        "deploymentApiVersion": "2017-08-01",
+        "networkApiVersion": "2017-08-01",
+        "computeApiVersion": "2017-03-30",
+        "scaleSettingsApiVersion": "2015-04-01",
+        "maxZonen": 3,   
+        "vnetID": "[resourceId('Microsoft.Network/virtualNetworks', parameters('vnetName'))]",
+        "subnet0Id": "[concat(variables('vnetID'), '/subnets/', parameters('subnet0Name'))]",
+        "settingsTable": {
+            "ubuntuScaleSet": {
+                "product": "UbuntuServer",
+                "publisher": "Canonical",
+                "sku": "16.04.0-LTS",
+                "vmSize": "[parameters('vmSize')]"
+            }
+        },
+        "settings": "[variables('settingsTable')[parameters('vmType')]]",
+        "nsgName": "[concat(parameters('vmName'), '-nsg')]",
+        "slbName": "[concat(parameters('vmName'), '-slb')]",
+        "slbBackendName": "[concat(parameters('vmName'), '-slbBackend')]",
+        "slbPipName": "[concat(parameters('vmName'), '-slbPip')]",
+        "slbSubnet": "[parameters('subnet0Name')]",
+		"deployLBTemplate": {
+			"yes": "[concat(parameters('baseRepoURL'), 'slb.json')]",
+			"no": "[concat(parameters('baseRepoURL'), 'nothing.json')]"
+		},
+		"LBTemplateURI": "[variables('deployLBTemplate')[parameters('deployLBYesNo')]]",
+        "deployLBintParametersHash": {
+            "yes": {
+                "baseRepoURL": { "value": "[parameters('baseRepoURL')]" },
+                "externalInternal": { "value": "internal" },
+                "vnetName": { "value": "[parameters('vnetName')]" },
+                "subnetName": { "value": "[variables('slbSubnet')]" },
+                "slbName": { "value": "[concat(variables('slbName'), '-int')]" },
+                "lbSku": { "value": "[parameters('lbSku')]" },
+                "backendConfigName": { "value": "[concat(variables('slbBackendName'), '-int')]" },
+                "ipPrefix": { "value": "[parameters('ipPrefix')]" },
+                "vipSuffix": { "value": "[parameters('vipSuffix')]" },
+                "probePort": { "value": 80 },
+                "frontendPort": { "value": 80 },
+                "backendPort": { "value": 80 },
+                "ruleName": { "value": "web" }
+            },
+            "no": {
+            }
+        },
+        "deployLBintParameters": "[variables('deployLBintParametersHash')[parameters('deployLBYesNo')]]",
+        "deployLBextParametersHash": {
+            "yes": {
+                "baseRepoUrl": { "value": "[parameters('baseRepoURL')]" },
+                "externalInternal": { "value": "external" },
+                "vnetName": { "value": "[parameters('vnetName')]" },
+                "subnetName": { "value": "[variables('slbSubnet')]" },
+                "slbName": { "value": "[concat(variables('slbName'), '-ext')]" },
+                "lbSku": { "value": "[parameters('lbSku')]" },
+                "backendConfigName": { "value": "[concat(variables('slbBackendName'), '-ext')]" },
+                "pipName": { "value": "[concat(variables('slbPipName'), '-ext')]" },
+                "probePort": { "value": 22 },
+                "frontendPort": { "value": 80 },
+                "backendPort": { "value": 80 },
+                "ruleName": { "value": "web" }
+            },
+            "no": {
+            }
+        },
+        "deployLBextParameters": "[variables('deployLBextParametersHash')[parameters('deployLBYesNo')]]",
+        "dummyDeploymentName": "[concat(parameters('vmName'), '-dummy')]",
+        "dummyDeploymentTemplate": "[concat(parameters('baseRepoURL'), 'nothing.json')]",
+        "vmssDependsOnSlbHash": {
+            "internal": "[concat(variables('slbName'), '-int')]",
+            "external": "[concat(variables('slbName'), '-ext')]",
+            "both": "[concat(variables('slbName'), '-ext')]"
+        },
+        "vmssDependsOnSlb": "[variables('vmssDependsOnSlbHash')[parameters('lbType')]]",
+        "vmssDependsOnNsgHash": {
+            "yes": "[variables('nsgName')]",
+            "no": "[variables('dummyDeploymentName')]"
+        },
+        "vmssDependsOnNsg": "[variables('vmssDependsOnNsgHash')[parameters('nsgYesNo')]]",
+        "vmssNameHash": {
+            "yes": "[concat(parameters('vmssName'), '-az')]",
+            "no": "[parameters('vmssName')]"
+        },
+        "slbBackendNameExtIntHash": {
+            "both": "[concat(variables('slbBackendName'), '-int')]",
+            "internal": "[concat(variables('slbBackendName'), '-int')]",
+            "external": "[concat(variables('slbBackendName'), '-ext')]"
+        },
+        "slbBackendNameExtInt": "[variables('slbBackendNameExtIntHash')[parameters('lbType')]]",
+        "lbBackendAddressPoolHash": {
+            "yes": {
+                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('vmssDependsOnSlb')), '/backendAddressPools/', variables('slbBackendNameExtInt'))]"
+            },
+            "no": {
+            }
+        },
+        "lbBackendAddressPool": "[variables('lbBackendAddressPoolHash')[parameters('deployLBYesNo')]]",
+        "lbInboundNatPoolName": "linuxPool",
+        "lbInboundNatPoolHash": {
+            "yes": {
+                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('vmssDependsOnSlb')), '/inboundNatPools/', variables('lbInboundNatPoolName'))]"
+            },
+            "no": {
+            }
+        },
+        "lbInboundNatPoolYesNoOld": "[if(or(equals(parameters('deployLBYesNo'), 'no'),equals(parameters('lbType'), 'internal')),'no','yes')]",
+        "lbInboundNatPoolYesNo": "no",
+        "lbInboundNatPool": "[variables('lbInboundNatPoolHash')[variables('lbInboundNatPoolYesNo')]]",
+        "vmssNsgHash": {
+            "yes": {
+                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('nsgName'))]"
+            },
+            "no": {
+            }
+        },
+        "vmssNsg": "[variables('vmssNsgHash')[parameters('nsgYesNo')]]"
+    },
+    "resources": [
+        {
+            "comments": "NSGs not required, but here for extra security",
+            "condition": "[equals(parameters('nsgYesNo'), 'yes')]",
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "name": "[variables('nsgName')]",
+            "apiVersion": "[variables('networkApiVersion')]",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "securityRules": [
+                    {
+                        "name": "default-allow-ssh",
+                        "properties": {
+                            "protocol": "TCP",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "22",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 1000,
+                            "direction": "Inbound"
+                        }
+                    },
+                    {
+                        "name": "default-allow-web",
+                        "properties": {
+                            "protocol": "TCP",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "80",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 1010,
+                            "direction": "Inbound"
+                        }
+                    }
+                ]
+            },
+            "resources": [],
+            "dependsOn": []
+        },
+		{
+			"comments": "Optionally, create an internal load balancer",
+            "condition": "[or(equals(parameters('lbType'), 'internal'), equals(parameters('lbType'), 'both'))]",
+            "name": "[concat(variables('slbName'), '-int')]",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "[variables('networkApiVersion')]",
+			"properties": {
+				"mode": "Incremental",
+				"templateLink": {
+					"uri": "[variables('LBTemplateUri')]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters":  "[variables('deployLBintParameters')]"
+			}
+		},
+		{
+			"comments": "Optionally, create an external load balancer. Wait until the internal one has finished",
+            "condition": "[or(equals(parameters('lbType'), 'external'), equals(parameters('lbType'), 'both'))]",
+            "name": "[concat(variables('slbName'), '-ext')]",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "[variables('networkApiVersion')]",
+			"properties": {
+				"mode": "Incremental",
+				"templateLink": {
+					"uri": "[variables('LBTemplateUri')]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters":  "[variables('deployLBextParameters')]"
+			},
+            "dependsOn": [
+                "[concat(variables('slbName'), '-int')]"
+            ]
+		},
+        {
+            "comments": "Create VM Scale Set, no AZs",
+            "condition": "[equals(parameters('azYesNo'), 'no')]",
+            "type": "Microsoft.Compute/virtualMachineScaleSets",
+            "name": "[variables('vmssNameHash')['no']]",
+            "location": "[resourceGroup().location]",
+            "apiVersion": "[variables('computeApiVersion')]",
+            "dependsOn": [
+                "[variables('vmssDependsOnSlb')]", "[variables('vmssDependsOnNsg')]"
+            ],
+            "sku": {
+                "name": "[variables('settings')['vmSize']]",
+                "capacity": "[parameters('vmCount')]"
+            },
+            "properties": {
+                "overprovision": true,
+                "upgradePolicy": {
+                    "mode": "Manual"
+                },
+                "virtualMachineProfile": {
+                    "storageProfile": {
+                        "osDisk": {
+                            "createOption": "FromImage"
+                        },
+                        "imageReference": {
+                            "publisher": "[variables('settings')['publisher']]",
+                            "offer": "[variables('settings')['product']]",
+                            "sku": "[variables('settings')['sku']]",
+                            "version": "latest"
+                        }
+                    },
+                    "osProfile": {
+                        "computerNamePrefix": "[concat(parameters('vmName'), '-')]",
+                        "adminUsername": "[parameters('vmUsr')]",
+                        "adminPassword": "[parameters('vmPwd')]"
+                    },
+                    "networkProfile": {
+                        "networkInterfaceConfigurations": [
+                            {
+                                "name": "eth0",
+                                "properties": {
+                                    "primary": true,
+                                    "ipConfigurations": [
+                                        {
+                                            "name": "ipconfig0",
+                                            "properties": {
+                                                "subnet": {
+                                                    "id": "[variables('subnet0Id')]"
+                                                },
+                                                "loadBalancerBackendAddressPools": [
+                                                    "[variables('lbBackendAddressPool')]"
+                                                ]
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        ]
+                    },
+                    "extensionProfile": {
+                        "extensions": [
+                            {
+                                "name": "VMSScustomScript",
+                                "properties": {
+                                    "publisher": "Microsoft.Azure.Extensions",
+                                    "settings": {
+                                        "fileUris": [
+                                            "[parameters('scriptUri')]"
+                                        ]
+                                    },
+                                    "protectedSettings": {
+                                        "commandToExecute": "[parameters('scriptCmd')]"
+                                    },
+                                    "typeHandlerVersion": "2.0",
+                                    "autoUpgradeMinorVersion": true,
+                                    "type": "CustomScript"
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        },
+        {
+            "comments": "Create VM Scale Set, with AZs",
+            "condition": "[equals(parameters('azYesNo'), 'yes')]",
+            "type": "Microsoft.Compute/virtualMachineScaleSets",
+            "name": "[concat(variables('vmssNameHash')['no'], '-az', copyIndex(1))]",
+            "location": "[resourceGroup().location]",
+            "apiVersion": "[variables('computeApiVersion')]",
+            "dependsOn": [
+                "[variables('vmssDependsOnSlb')]", "[variables('vmssDependsOnNsg')]"
+            ],
+            "copy": {
+                "name": "[variables('vmssNameHash')['yes']]",
+                "count": "[parameters('azCount')]"
+            },
+            "zones": [
+                "[string(add(mod(copyIndex(0), variables('maxZonen')), 1))]"
+            ],
+            "sku": {
+                "name": "[variables('settings')['vmSize']]",
+                "capacity": "[parameters('vmCount')]"
+            },
+            "properties": {
+                "overprovision": true,
+                "upgradePolicy": {
+                    "mode": "Manual"
+                },
+                "virtualMachineProfile": {
+                    "storageProfile": {
+                        "osDisk": {
+                            "createOption": "FromImage"
+                        },
+                        "imageReference": {
+                            "publisher": "[variables('settings')['publisher']]",
+                            "offer": "[variables('settings')['product']]",
+                            "sku": "[variables('settings')['sku']]",
+                            "version": "latest"
+                        }
+                    },
+                    "osProfile": {
+                        "computerNamePrefix": "[concat(parameters('vmName'), '-az', copyIndex(1), '-')]",
+                        "adminUsername": "[parameters('vmUsr')]",
+                        "adminPassword": "[parameters('vmPwd')]"
+                    },
+                    "networkProfile": {
+                        "networkInterfaceConfigurations": [
+                            {
+                                "name": "nic0",
+                                "properties": {
+                                    "primary": true,
+                                    "ipConfigurations": [
+                                        {
+                                            "name": "ipconfig0",
+                                            "properties": {
+                                                "subnet": {
+                                                    "id": "[variables('subnet0Id')]"
+                                                },
+                                                "loadBalancerBackendAddressPools": [
+                                                    "[variables('lbBackendAddressPool')]"
+                                                ]
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        ]
+                    },
+                    "extensionProfile": {
+                        "extensions": [
+                            {
+                                "name": "VMSScustomScript",
+                                "properties": {
+                                    "publisher": "Microsoft.Azure.Extensions",
+                                    "settings": {
+                                        "fileUris": [
+                                            "[parameters('scriptUri')]"
+                                        ]
+                                    },
+                                    "protectedSettings": {
+                                        "commandToExecute": "[parameters('scriptCmd')]"
+                                    },
+                                    "typeHandlerVersion": "2.0",
+                                    "autoUpgradeMinorVersion": true,
+                                    "type": "CustomScript"
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        },
+        {
+            "comments": "Create the autoscale settings for the VM scale set with no zones",
+            "condition": "[equals(parameters('azYesNo'), 'no')]",
+            "type": "Microsoft.Insights/autoscaleSettings",
+            "apiVersion": "[variables('scaleSettingsApiVersion')]",
+            "name": "[parameters('scaleSettingsName')]",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[concat('Microsoft.Compute/virtualMachineScaleSets/', variables('vmssNameHash')['no'])]"
+            ],
+            "properties": {
+                "name": "[parameters('scaleSettingsName')]",
+                "targetResourceUri": "[concat('/subscriptions/',subscription().subscriptionId, '/resourceGroups/',  resourceGroup().name, '/providers/Microsoft.Compute/virtualMachineScaleSets/', variables('vmssNameHash')[parameters('AzYesNo')])]",
+                "enabled": true,
+                "profiles": [
+                    {
+                        "name": "Profile1",
+                        "capacity": {
+                            "minimum": "[parameters('capacityMin')]",
+                            "maximum": "[parameters('capacityMax')]",
+                            "default": "[parameters('capacityDef')]"
+                        },
+                        "rules": [
+                            {
+                                "metricTrigger": {
+                                    "metricName": "Percentage CPU",
+                                    "metricNamespace": "",
+                                    "metricResourceUri": "[concat('/subscriptions/',subscription().subscriptionId, '/resourceGroups/',  resourceGroup().name, '/providers/Microsoft.Compute/virtualMachineScaleSets/', parameters('vmSSName'))]",
+                                    "timeGrain": "PT1M",
+                                    "statistic": "Average",
+                                    "timeWindow": "PT5M",
+                                    "timeAggregation": "Average",
+                                    "operator": "GreaterThan",
+                                    "threshold": "[parameters('cpuMax')]"
+                                },
+                                "scaleAction": {
+                                    "direction": "Increase",
+                                    "type": "ChangeCount",
+                                    "value": "1",
+                                    "cooldown": "PT1M"
+                                }
+                            },
+                            {
+                                "metricTrigger": {
+                                    "metricName": "Percentage CPU",
+                                    "metricNamespace": "",
+                                    "metricResourceUri": "[concat('/subscriptions/',subscription().subscriptionId, '/resourceGroups/',  resourceGroup().name, '/providers/Microsoft.Compute/virtualMachineScaleSets/', parameters('vmSSName'))]",
+                                    "timeGrain": "PT1M",
+                                    "statistic": "Average",
+                                    "timeWindow": "PT5M",
+                                    "timeAggregation": "Average",
+                                    "operator": "LessThan",
+                                    "threshold": "[parameters('cpuMin')]"
+                                },
+                                "scaleAction": {
+                                    "direction": "Decrease",
+                                    "type": "ChangeCount",
+                                    "value": "1",
+                                    "cooldown": "PT5M"
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "comments": "Create the autoscale settings for the VM scale set with availability zones",
+            "condition": "[equals(parameters('azYesNo'), 'yes')]",
+            "type": "Microsoft.Insights/autoscaleSettings",
+            "apiVersion": "[variables('scaleSettingsApiVersion')]",
+            "name": "[concat(parameters('scaleSettingsName'), '-az', copyIndex(1))]",
+            "location": "[resourceGroup().location]",
+            "copy": {
+                "name": "[concat(parameters('scaleSettingsName'), '-az')]",
+                "count": "[parameters('azCount')]"
+            },
+            "dependsOn": [
+                "[variables('vmssNameHash')['yes']]"
+            ],
+            "properties": {
+                "name": "[concat(parameters('scaleSettingsName'), '-az', copyIndex(1))]",
+                "targetResourceUri": "[concat('/subscriptions/',subscription().subscriptionId, '/resourceGroups/',  resourceGroup().name, '/providers/Microsoft.Compute/virtualMachineScaleSets/', concat(variables('vmssNameHash')['no'], '-az', copyIndex(1)))]",
+                "enabled": true,
+                "profiles": [
+                    {
+                        "name": "Profile1",
+                        "capacity": {
+                            "minimum": "[parameters('capacityMin')]",
+                            "maximum": "[parameters('capacityMax')]",
+                            "default": "[parameters('capacityDef')]"
+                        },
+                        "rules": [
+                            {
+                                "metricTrigger": {
+                                    "metricName": "Percentage CPU",
+                                    "metricNamespace": "",
+                                    "metricResourceUri": "[concat('/subscriptions/',subscription().subscriptionId, '/resourceGroups/',  resourceGroup().name, '/providers/Microsoft.Compute/virtualMachineScaleSets/', concat(variables('vmssNameHash')['no'], '-az', copyIndex(1)))]",
+                                    "timeGrain": "PT1M",
+                                    "statistic": "Average",
+                                    "timeWindow": "PT5M",
+                                    "timeAggregation": "Average",
+                                    "operator": "GreaterThan",
+                                    "threshold": "[parameters('cpuMax')]"
+                                },
+                                "scaleAction": {
+                                    "direction": "Increase",
+                                    "type": "ChangeCount",
+                                    "value": "1",
+                                    "cooldown": "PT1M"
+                                }
+                            },
+                            {
+                                "metricTrigger": {
+                                    "metricName": "Percentage CPU",
+                                    "metricNamespace": "",
+                                    "metricResourceUri": "[concat('/subscriptions/',subscription().subscriptionId, '/resourceGroups/',  resourceGroup().name, '/providers/Microsoft.Compute/virtualMachineScaleSets/', concat(variables('vmssNameHash')['no'], '-az', copyIndex(1)))]",
+                                    "timeGrain": "PT1M",
+                                    "statistic": "Average",
+                                    "timeWindow": "PT5M",
+                                    "timeAggregation": "Average",
+                                    "operator": "LessThan",
+                                    "threshold": "[parameters('cpuMin')]"
+                                },
+                                "scaleAction": {
+                                    "direction": "Decrease",
+                                    "type": "ChangeCount",
+                                    "value": "1",
+                                    "cooldown": "PT5M"
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+		{
+			"comments": "Dummy Deployment for fake dependency for the NIC, in case no PIP is required",
+            "name": "[variables('dummyDeploymentName')]",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "[variables('deploymentApiVersion')]",
+			"properties": {
+				"mode": "Incremental",
+				"templateLink": {
+					"uri": "[variables('dummyDeploymentTemplate')]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters":  {}
+			},
+            "dependsOn": []
+        }
+     ]
+}

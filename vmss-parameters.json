@@ -1,0 +1,26 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+            "vmCount": { "value": 2 },
+            "vmName": { "value": "myVm" },
+            "vmSize": { "value": "Standard_D1_v2" },
+            "vmssName": { "value": "myVmss" },
+            "vnetName": { "value": "myVnet" },
+            "subnet0Name": { "value": "subnet1" },
+            "vmUsr": { "value": "admin" },
+            "vmPwd": { "value": "Microsoft123!" },
+            "deployLBYesNo": { "value": "yes" },
+            "lbSku": { "value": "basic" },
+            "lbType": { "value": "external" },
+            "azYesNo": { "value": "no" },
+            "scriptUri": { "value": "https://raw.githubusercontent.com/erjosito/IaC-Test/master/ubuntu-vm-config.sh" },
+            "scriptCmd": { "value": "sh ubuntu-vm-config.sh" },
+            "capacityMax": { "value": 10 },
+            "capacityMin": { "value": 2 },
+            "capacityDef": { "value": 1 },
+            "cpuMax": { "value": 60 },
+            "cpuMin": { "value": 30 }
+
+        }
+}

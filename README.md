@@ -54,3 +54,4 @@ az group deployment create -g azlab --name azLabDeployment --template-uri https:
 
 ## To Do
 * Use the function deployment().properties.templateLink.uri for base URI handling
+* Fix inboundNatPool assignment in the VMSS
