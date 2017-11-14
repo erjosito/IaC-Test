@@ -24,9 +24,9 @@
                         }
                     },
                     {
-                        "name": "subnet2",
+                        "name": "subnet3",
                         "properties": {
-                            "addressPrefix": "172.31.22.0/24"
+                            "addressPrefix": "172.31.23.0/24"
                         }
                     },
                 ]
