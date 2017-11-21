@@ -37,6 +37,12 @@
                             "addressPrefix": "172.31.23.0/24"
                         }
                     },
+                    {
+                        "name": "subnet4",
+                        "properties": {
+                            "addressPrefix": "172.31.24.0/24"
+                        }
+                    },
                 ]
             },
             "resources": [],
